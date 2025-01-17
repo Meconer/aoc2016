@@ -1,0 +1,7 @@
+(include_subdirs no)
+
+(library
+ (name day1)
+ (preprocess
+  (pps ppx_sexp_conv))
+ (libraries core))
