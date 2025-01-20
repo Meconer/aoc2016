@@ -33,11 +33,15 @@ let parse_input lines =
   in
   loop [] lines
 
+
+let calc_counts lst = 
+  
 let calc_checksum_from_name name_parts =
   let name = Option.value_exn (List.reduce name_parts ~f:(fun a b -> a ^ b)) in
   let charlist = String.to_list name in
   let sorted = List.sort charlist ~compare:Char.compare in
-  let counts = List.map sorted 
+  let counts = calc_counts sorted in
+  counts
 
 (* let is_real_room room =
    let name_parts, sector_id, checksum = room in
