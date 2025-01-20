@@ -19,18 +19,21 @@ let has_rev_pair s =
   loop c_list
 
 let supports_TLS line =
-  let rec loop in_bracket out_bracket line =
+  let rec loop in_bracket_parts out_bracket_parts line =
     let fb_pos = String.index line '[' in
     let sb_pos = String.index line ']' in
     match fb_pos with
-    | None -> (in_bracket, out_bracket ^ line)
+    | None -> (in_bracket_parts, out_bracket_parts ^ "," ^ line)
     | Some idx -> (
         match sb_pos with
         | None -> failwith "No matching bracket"
         | Some s_idx ->
-            let out_bracket = out_bracket ^ String.sub line ~pos:0 ~len:idx in
+            let out_bracket =
+              out_bracket_parts ^ "," ^ String.sub line ~pos:0 ~len:idx
+            in
             let in_bracket =
-              in_bracket ^ String.sub line ~pos:(idx + 1) ~len:(s_idx - idx - 1)
+              in_bracket_parts ^ ","
+              ^ String.sub line ~pos:(idx + 1) ~len:(s_idx - idx - 1)
             in
             loop in_bracket out_bracket
               (String.sub line ~pos:(s_idx + 1)
