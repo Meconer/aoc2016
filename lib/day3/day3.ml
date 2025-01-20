@@ -18,8 +18,6 @@ let solve_p1 lines = List.count lines ~f:is_valid
 let resultP1 = solve_p1 aoc_input
 
 let count_valid lst =
-  List.iter lst ~f:(fun l -> Printf.printf "%s \n" l);
-
   let digits =
     List.map lst ~f:(fun line ->
         Scanf.sscanf line " %d %d %d" (fun a b c -> [| a; b; c |]))
