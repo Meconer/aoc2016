@@ -46,4 +46,18 @@ let solve_p1 line =
   loop "" line
 
 let resultP1 = String.length (solve_p1 aoc_input)
+
+let solve_p2 line = 
+  let rec loop length s_after =
+   let p_pos1 = String.index s_after '(' in
+    match p_pos1 with
+    | None -> length + (String.length  s_after)
+    | Some p_pos1 -> 
+        let p_pos2 = String.index s_after ')' in
+        match p_pos2 with
+        | None -> length + (String.length s_after)
+        | Some p_pos2 ->
+
+
+
 let resultP2 = 0
