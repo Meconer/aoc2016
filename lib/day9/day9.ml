@@ -1,11 +1,17 @@
 open Core
 
-let isExample = true
+let isExample = false
 
 let filename =
   if isExample then "lib/day9/example.txt" else "lib/day9/input.txt"
 
 let aoc_input = In_channel.read_all filename
+
+let repeat_str s count =
+  let rec loop acc count =
+    if count = 1 then acc else loop (acc ^ s) (count - 1)
+  in
+  loop s count
 
 let solve_p1 line =
   let rec loop s_before s_after =
@@ -23,9 +29,21 @@ let solve_p1 line =
             let cp_instr =
               String.sub s_after ~pos:(p_pos1 + 1) ~len:(p_pos2 - p_pos1 - 1)
             in
-            new_s_before ^ " - " ^ cp_instr)
+            let no_of_chars, repeats =
+              Scanf.sscanf cp_instr "%dx%d" (fun a b -> (a, b))
+            in
+            let str_to_repeat =
+              String.sub s_after ~pos:(p_pos2 + 1) ~len:no_of_chars
+            in
+            let rep_str = repeat_str str_to_repeat repeats in
+            let start_of_rest_of_str = p_pos2 + 1 + no_of_chars in
+            let new_s_after =
+              String.sub s_after ~pos:start_of_rest_of_str
+                ~len:(String.length s_after - start_of_rest_of_str)
+            in
+            loop (new_s_before ^ rep_str) new_s_after)
   in
   loop "" line
 
-let resultP1 = 0
+let resultP1 = String.length (solve_p1 aoc_input)
 let resultP2 = 0
