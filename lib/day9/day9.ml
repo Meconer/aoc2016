@@ -1,6 +1,6 @@
 open Core
 
-let isExample = true
+let isExample = false
 
 let filename =
   if isExample then "lib/day9/example.txt" else "lib/day9/input.txt"
@@ -50,9 +50,7 @@ let resultP1 = String.length (solve_p1 aoc_input)
 let solve_p2 line =
   let memo = Map.empty (module String) in
   let rec loop length s_after memo =
-    if Map.mem memo s_after then
-      let c = Map.find_exn memo s_after in
-      c
+    if Map.mem memo s_after then Map.find_exn memo s_after
     else
       let p_pos1 = String.index s_after '(' in
       match p_pos1 with
@@ -86,5 +84,4 @@ let solve_p2 line =
   in
   loop 0 line memo
 
-(* 10755693148 too high *)
-let resultP2 = 0
+let resultP2 = solve_p2 aoc_input
