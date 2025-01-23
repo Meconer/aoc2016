@@ -49,6 +49,7 @@ let resultP1 = String.length (solve_p1 aoc_input)
 
 let solve_p2 line =
   let rec loop length s_after =
+    Printf.printf "%s\n" s_after;
     let p_pos1 = String.index s_after '(' in
     match p_pos1 with
     | None -> length + String.length s_after
