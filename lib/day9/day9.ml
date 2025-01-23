@@ -1,6 +1,6 @@
 open Core
 
-let isExample = false
+let isExample = true
 
 let filename =
   if isExample then "lib/day9/example.txt" else "lib/day9/input.txt"
@@ -47,17 +47,34 @@ let solve_p1 line =
 
 let resultP1 = String.length (solve_p1 aoc_input)
 
-let solve_p2 line = 
+let solve_p2 line =
   let rec loop length s_after =
-   let p_pos1 = String.index s_after '(' in
+    let p_pos1 = String.index s_after '(' in
     match p_pos1 with
-    | None -> length + (String.length  s_after)
-    | Some p_pos1 -> 
+    | None -> length + String.length s_after
+    | Some p_pos1 -> (
         let p_pos2 = String.index s_after ')' in
         match p_pos2 with
-        | None -> length + (String.length s_after)
+        | None -> length + String.length s_after
         | Some p_pos2 ->
-
-
+            let cp_instr =
+              String.sub s_after ~pos:(p_pos1 + 1) ~len:(p_pos2 - p_pos1 - 1)
+            in
+            let no_of_chars, repeats =
+              Scanf.sscanf cp_instr "%dx%d" (fun a b -> (a, b))
+            in
+            let str_to_repeat =
+              String.sub s_after ~pos:(p_pos2 + 1) ~len:no_of_chars
+            in
+            let rep_str = repeat_str str_to_repeat repeats in
+            let start_of_rest_of_str = p_pos2 + 1 + no_of_chars in
+            let new_s_after =
+              String.sub s_after ~pos:start_of_rest_of_str
+                ~len:(String.length s_after - start_of_rest_of_str)
+            in
+            let length_to_add = loop 0 rep_str in
+            loop (length + length_to_add) new_s_after)
+  in
+  loop 0 line
 
 let resultP2 = 0
