@@ -48,34 +48,43 @@ let solve_p1 line =
 let resultP1 = String.length (solve_p1 aoc_input)
 
 let solve_p2 line =
-  let rec loop length s_after =
-    Printf.printf "%s\n" s_after;
-    let p_pos1 = String.index s_after '(' in
-    match p_pos1 with
-    | None -> length + String.length s_after
-    | Some p_pos1 -> (
-        let p_pos2 = String.index s_after ')' in
-        match p_pos2 with
-        | None -> length + String.length s_after
-        | Some p_pos2 ->
-            let cp_instr =
-              String.sub s_after ~pos:(p_pos1 + 1) ~len:(p_pos2 - p_pos1 - 1)
-            in
-            let no_of_chars, repeats =
-              Scanf.sscanf cp_instr "%dx%d" (fun a b -> (a, b))
-            in
-            let str_to_repeat =
-              String.sub s_after ~pos:(p_pos2 + 1) ~len:no_of_chars
-            in
-            let rep_str = repeat_str str_to_repeat repeats in
-            let start_of_rest_of_str = p_pos2 + 1 + no_of_chars in
-            let new_s_after =
-              String.sub s_after ~pos:start_of_rest_of_str
-                ~len:(String.length s_after - start_of_rest_of_str)
-            in
-            let length_to_add = loop 0 rep_str in
-            loop (length + length_to_add) new_s_after)
+  let memo = Map.empty (module String) in
+  let rec loop length s_after memo =
+    if Map.mem memo s_after then
+      let c = Map.find_exn memo s_after in
+      c
+    else
+      let p_pos1 = String.index s_after '(' in
+      match p_pos1 with
+      | None ->
+          (* Printf.printf "%s\n" s_after; *)
+          length + String.length s_after
+      | Some p_pos1 -> (
+          let p_pos2 = String.index s_after ')' in
+          match p_pos2 with
+          | None -> length + String.length s_after
+          | Some p_pos2 ->
+              let cp_instr =
+                String.sub s_after ~pos:(p_pos1 + 1) ~len:(p_pos2 - p_pos1 - 1)
+              in
+              let no_of_chars, repeats =
+                Scanf.sscanf cp_instr "%dx%d" (fun a b -> (a, b))
+              in
+              let str_to_repeat =
+                String.sub s_after ~pos:(p_pos2 + 1) ~len:no_of_chars
+              in
+              let rep_str = repeat_str str_to_repeat repeats in
+              let start_of_rest_of_str = p_pos2 + 1 + no_of_chars in
+              let new_s_after =
+                String.sub s_after ~pos:start_of_rest_of_str
+                  ~len:(String.length s_after - start_of_rest_of_str)
+              in
+              let length_to_add = loop 0 rep_str memo in
+              let memo = Map.set memo ~key:rep_str ~data:length_to_add in
+              let length = length + p_pos1 in
+              loop (length + length_to_add) new_s_after memo)
   in
-  loop 0 line
+  loop 0 line memo
 
+(* 10755693148 too high *)
 let resultP2 = 0
