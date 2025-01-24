@@ -7,12 +7,12 @@ let filename =
 
 let aoc_input = In_channel.read_lines filename
 
-type give_rule_t = { from_bot : string; to_high : string; to_low : string }
+type rule_t = { from_bot : string; to_high : string; to_low : string }
 
 let parse_rules lines =
-  let rec loop start_bots givings lines =
+  let rec loop start_bots rules lines =
     match lines with
-    | [] -> (start_bots, givings)
+    | [] -> (start_bots, rules)
     | line :: rest ->
         if String.is_prefix line ~prefix:"value" then
           let value, bot =
@@ -24,7 +24,7 @@ let parse_rules lines =
               | None -> [ value ]
               | Some values -> value :: values)
           in
-          loop start_bots givings rest
+          loop start_bots rules rest
         else if not (String.is_prefix line ~prefix:"bot") then
           failwith ("Error in line: " ^ line)
         else
@@ -35,8 +35,8 @@ let parse_rules lines =
                   l ^ string_of_int ln,
                   h ^ string_of_int hn ))
           in
-          let givings = { from_bot; to_high; to_low } :: givings in
-          loop start_bots givings rest
+          let rules = { from_bot; to_high; to_low } :: rules in
+          loop start_bots rules rest
   in
   loop (Map.empty (module String)) [] lines
 
@@ -48,7 +48,22 @@ let find_bot_with v1 v2 bots =
       then Some bot
       else acc)
 
-let solve_p1 bots rules =
+let check_outputs_p2 bots =
+  let out0 = Map.find bots "output0" in
+  match out0 with
+  | None -> None
+  | Some out0 -> (
+      let out1 = Map.find bots "output1" in
+      match out1 with
+      | None -> None
+      | Some out1 -> (
+          let out2 = Map.find bots "output2" in
+          match out2 with
+          | None -> None
+          | Some out2 ->
+              Some (List.hd_exn out0 * List.hd_exn out1 * List.hd_exn out2)))
+
+let solve bots rules part2 =
   let rec loop bots rules =
     match rules with
     | [] -> (bots, false)
@@ -76,21 +91,33 @@ let solve_p1 bots rules =
               else loop bots rest)
   in
 
-  let rec solve_loop bots rules =
+  let rec solve_p1_loop bots rules =
     let bots, found = loop bots rules in
     if found then
       match find_bot_with 61 17 bots with
-      | None -> solve_loop bots rules
-      | Some bot -> bot
-    else solve_loop bots rules
+      | None -> solve_p1_loop bots rules
+      | Some bot -> (bot, 0)
+    else solve_p1_loop bots rules
   in
 
-  solve_loop bots rules
+  let rec solve_p2_loop bots rules =
+    let bots, _ = loop bots rules in
+    let p2_answer_opt = check_outputs_p2 bots in
+    match p2_answer_opt with
+    | None -> solve_p2_loop bots rules
+    | Some p2_answer -> p2_answer
+  in
+
+  if not part2 then solve_p1_loop bots rules
+  else
+    let res = solve_p2_loop bots rules in
+    ("", res)
 
 let bots, rules = parse_rules aoc_input
-let bot = solve_p1 bots rules
+let bot, _ = solve bots rules false
 
 let resultP1 =
   int_of_string (String.sub bot ~pos:3 ~len:(String.length bot - 3))
 
-let resultP2 = 0
+let bots, rules = parse_rules aoc_input
+let _, resultP2 = solve bots rules true
