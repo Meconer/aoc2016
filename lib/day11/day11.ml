@@ -71,6 +71,11 @@ let pick_one lst =
 
   loop [] lst
 
+let pick_two lst =
+  let rec loop lst =
+    match lst with 
+    | a::b::[] 
+
 (* let get_neighbour_states state =
    let stuff_on_this_floor = List.nth_exn state.floors state.elevator_floor in
    let states_with_one_pick = List.concat_map stuff_on_this_floor ~f:(fun obj -> {state with }) *)
