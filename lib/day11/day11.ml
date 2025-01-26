@@ -1,11 +1,8 @@
 open Core
 
-let isExample = false
+let isExample = true
 
-type elevator_t = { floor : int; contents : string list }
-type state_t = { floors : string list list; elevator : elevator_t }
-
-let elevator = { floor = 0; contents = [] }
+type state_t = { floors : string list list; elevator_floor : int }
 
 let floors =
   if isExample then [ [ "HYM"; "LIM" ]; [ "HYG" ]; [ "LIG" ]; [] ]
@@ -17,20 +14,24 @@ let floors =
       [];
     ]
 
-let string_of_elevator elevator =
-  string_of_int elevator.floor
-  ^ List.fold elevator.contents ~init:"" ~f:(fun acc el -> acc ^ "," ^ el)
+let start_state = { floors; elevator_floor = 0 }
 
 let string_of_floor floor floor_no =
-  string_of_int floor_no ^ "/"
-  ^ List.fold floor ~init:"" ~f:(fun acc el -> acc ^ el ^ "/")
+  let s =
+    string_of_int floor_no ^ "%"
+    ^ List.fold floor ~init:"" ~f:(fun acc el -> acc ^ el ^ "/")
+  in
+  if List.is_empty floor then s else String.drop_suffix s 1
 
 let string_of_floors floors =
-  List.foldi floors ~init:"" ~f:(fun idx acc floor ->
-      acc ^ string_of_floor floor idx)
+  let s =
+    List.foldi floors ~init:"" ~f:(fun idx acc floor ->
+        acc ^ string_of_floor floor idx ^ "&")
+  in
+  String.drop_suffix s 1
 
-let string_of_state elevator floors =
-  string_of_elevator elevator ^ "|" ^ string_of_floors floors
+let string_of_state state =
+  string_of_int state.elevator_floor ^ "|" ^ string_of_floors floors
 
 let is_mc s = Char.equal (String.get s 2) 'M'
 let is_gen s = Char.equal (String.get s 2) 'G'
