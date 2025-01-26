@@ -60,9 +60,22 @@ let legal_floor floor =
     let sorted = List.sort floor ~compare:String.compare in
     if has_single_mc sorted && has_single_gen sorted then false else true
 
-(* let is_target state =
+let is_target state =
+  let lower_floors = List.drop_last_exn state.floors in
+  not (List.exists lower_floors ~f:(fun floor -> not (List.is_empty floor)))
 
-   let solve_p1 floors elevator =
+let pick_one lst =
+  let rec loop acc lst =
+    match lst with [] -> acc | hd :: tl -> loop ([ hd ] :: acc) tl
+  in
+
+  loop [] lst
+
+(* let get_neighbour_states state =
+   let stuff_on_this_floor = List.nth_exn state.floors state.elevator_floor in
+   let states_with_one_pick = List.concat_map stuff_on_this_floor ~f:(fun obj -> {state with }) *)
+
+(* let solve_p1 floors elevator =
 
      let rec loop step_count state =
        if is_target state then step_count
