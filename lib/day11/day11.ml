@@ -2,17 +2,17 @@ open Core
 
 let isExample = true
 
-type state_t = { floors : string list list; elevator_floor : int }
+type state_t = { floors : string list array; elevator_floor : int }
 
 let floors =
-  if isExample then [ [ "HYM"; "LIM" ]; [ "HYG" ]; [ "LIG" ]; [] ]
+  if isExample then [| [ "HYM"; "LIM" ]; [ "HYG" ]; [ "LIG" ]; [] |]
   else
-    [
+    [|
       [ "POG"; "THG"; "THM"; "PRG"; "RUG"; "RUM"; "COG"; "COM" ];
       [ "POM"; "PRM" ];
       [];
       [];
-    ]
+    |]
 
 let start_state = { floors; elevator_floor = 0 }
 
@@ -25,7 +25,7 @@ let string_of_floor floor floor_no =
 
 let string_of_floors floors =
   let s =
-    List.foldi floors ~init:"" ~f:(fun idx acc floor ->
+    Array.foldi floors ~init:"" ~f:(fun idx acc floor ->
         acc ^ string_of_floor floor idx ^ "&")
   in
   String.drop_suffix s 1
@@ -61,24 +61,31 @@ let legal_floor floor =
     if has_single_mc sorted && has_single_gen sorted then false else true
 
 let is_target state =
-  let lower_floors = List.drop_last_exn state.floors in
-  not (List.exists lower_floors ~f:(fun floor -> not (List.is_empty floor)))
+  let lower_floors = Array.sub state.floors ~pos:0 ~len:3 in
+  not (Array.exists lower_floors ~f:(fun floor -> not (List.is_empty floor)))
 
 let pick_one lst =
   let rec loop acc lst =
     match lst with [] -> acc | hd :: tl -> loop ([ hd ] :: acc) tl
   in
-
   loop [] lst
 
-let pick_two lst =
-  let rec loop lst =
-    match lst with 
-    | a::b::[] 
+let rec pick_two lst =
+  match lst with
+  | [] -> []
+  | x :: xs ->
+      let pairs_with_x = List.map ~f:(fun y -> [ x; y ]) xs in
+      pairs_with_x @ pick_two xs
 
 (* let get_neighbour_states state =
    let stuff_on_this_floor = List.nth_exn state.floors state.elevator_floor in
-   let states_with_one_pick = List.concat_map stuff_on_this_floor ~f:(fun obj -> {state with }) *)
+   let stuff_to_move = pick_one stuff_on_this_floor @ pick_two stuff_on_this_floor in
+   if state.elevator_floor < 3 then
+     (* Not on top floor, We can move stuff up *)
+
+   let moves_up = List.map stuff_to_move ~f:(fun pick ->
+      let new_stuff_on_this_floor = remove_stuff pick stuff_on_this_floor in
+    ) *)
 
 (* let solve_p1 floors elevator =
 
