@@ -116,9 +116,12 @@ let get_neighbour_states state =
   let n_states = moves_up @ moves_dn in
   List.filter n_states ~f:(fun state -> is_valid_state state)
 
-let solve_p1 floors elevator =u:
 
-     let rec loop step_count state =
+let solve_p1 start_state  =
+    let queue = [(0,start_state)] in
+
+    let rec loop cost queue =
+      
        if is_target state then step_count
        else
 
