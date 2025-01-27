@@ -54,7 +54,7 @@ let has_single s_list is_fn =
 let has_single_mc s_list = has_single s_list is_mc
 let has_single_gen s_list = has_single s_list is_gen
 
-let legal_floor floor =
+let is_legal_floor floor =
   if List.length floor < 2 then true
   else
     let sorted = List.sort floor ~compare:String.compare in
@@ -63,6 +63,9 @@ let legal_floor floor =
 let is_target state =
   let lower_floors = Array.sub state.floors ~pos:0 ~len:3 in
   not (Array.exists lower_floors ~f:(fun floor -> not (List.is_empty floor)))
+
+let is_valid_state state =
+  Array.for_all state.floors ~f:(fun floor -> is_legal_floor floor)
 
 let pick_one lst =
   let rec loop acc lst =
@@ -78,25 +81,46 @@ let rec pick_two lst =
       pairs_with_x @ pick_two xs
 
 let remove_stuff stuff_to_remove stuff =
-  List.filter stuff ~f:(fun el -> not (List.mem stuff_to_remove el ~equal:String.equal))
+  List.filter stuff ~f:(fun el ->
+      not (List.mem stuff_to_remove el ~equal:String.equal))
 
+let move_stuff stuff_to_move state change =
+  let stuff_on_this_floor = Array.get state.floors state.elevator_floor in
+  List.map stuff_to_move ~f:(fun pick ->
+      let new_stuff_on_this_floor = remove_stuff pick stuff_on_this_floor in
+      let new_stuff_on_next_floor =
+        pick @ Array.get state.floors (state.elevator_floor + change)
+      in
+      let new_floors = Array.copy state.floors in
+      Array.set new_floors state.elevator_floor new_stuff_on_this_floor;
+      Array.set new_floors
+        (state.elevator_floor + change)
+        new_stuff_on_next_floor;
+      let new_state =
+        { floors = new_floors; elevator_floor = state.elevator_floor + change }
+      in
+      new_state)
 
 let get_neighbour_states state =
-   let stuff_on_this_floor = Array.get state.floors state.elevator_floor in
-   let stuff_to_move = pick_one stuff_on_this_floor @ pick_two stuff_on_this_floor in
-   if state.elevator_floor < 3 then
-     (* Not on top floor, We can move stuff up *)
+  let stuff_on_this_floor = Array.get state.floors state.elevator_floor in
+  let stuff_to_move =
+    pick_one stuff_on_this_floor @ pick_two stuff_on_this_floor
+  in
 
-   let moves_up = List.map stuff_to_move ~f:(fun pick ->
-      let new_stuff_on_this_floor = remove_stuff pick stuff_on_this_floor in
-      let new_stuff_on_next_floor = 
-    )
+  let moves_up =
+    if state.elevator_floor = 3 then [] else move_stuff stuff_to_move state 1
+  in
+  let moves_dn =
+    if state.elevator_floor = 0 then [] else move_stuff stuff_to_move state (-1)
+  in
+  let n_states = moves_up @ moves_dn in
+  List.filter n_states ~f:(fun state -> is_valid_state state)
 
-(* let solve_p1 floors elevator =
+let solve_p1 floors elevator =u:
 
      let rec loop step_count state =
        if is_target state then step_count
        else
 
    let resultP1 = 0
-   let resultP2 = 0 *)
+   let resultP2 = 0
