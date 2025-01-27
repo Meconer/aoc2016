@@ -77,15 +77,20 @@ let rec pick_two lst =
       let pairs_with_x = List.map ~f:(fun y -> [ x; y ]) xs in
       pairs_with_x @ pick_two xs
 
-(* let get_neighbour_states state =
-   let stuff_on_this_floor = List.nth_exn state.floors state.elevator_floor in
+let remove_stuff stuff_to_remove stuff =
+  List.filter stuff ~f:(fun el -> not (List.mem stuff_to_remove el ~equal:String.equal))
+
+
+let get_neighbour_states state =
+   let stuff_on_this_floor = Array.get state.floors state.elevator_floor in
    let stuff_to_move = pick_one stuff_on_this_floor @ pick_two stuff_on_this_floor in
    if state.elevator_floor < 3 then
      (* Not on top floor, We can move stuff up *)
 
    let moves_up = List.map stuff_to_move ~f:(fun pick ->
       let new_stuff_on_this_floor = remove_stuff pick stuff_on_this_floor in
-    ) *)
+      let new_stuff_on_next_floor = 
+    )
 
 (* let solve_p1 floors elevator =
 
