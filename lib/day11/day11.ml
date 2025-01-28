@@ -101,7 +101,7 @@ let move_stuff stuff_to_move state change =
       in
       new_state)
 
-let get_neighbour_states state =
+let get_neighbour_states state visited =
   let stuff_on_this_floor = Array.get state.floors state.elevator_floor in
   let stuff_to_move =
     pick_one stuff_on_this_floor @ pick_two stuff_on_this_floor
@@ -114,16 +114,49 @@ let get_neighbour_states state =
     if state.elevator_floor = 0 then [] else move_stuff stuff_to_move state (-1)
   in
   let n_states = moves_up @ moves_dn in
-  List.filter n_states ~f:(fun state -> is_valid_state state)
+  let n_states = List.filter n_states ~f:(fun state -> is_valid_state state) in
+  List.filter n_states ~f:(fun state ->
+      not (Set.mem visited (string_of_state state)))
 
+let get_state_with_lowest_cost queue =
+  let res =
+    List.foldi queue
+      ~init:(-1, List.hd_exn queue)
+      ~f:(fun idx acc item ->
+        let cost, _ = item in
+        if cost < fst acc then (idx, item) else acc)
+  in
+  let el_no_to_remove, item = res in
+  let new_queue = List.filteri queue ~f:(fun idx _ -> idx <> el_no_to_remove) in
+  (new_queue, item)
 
-let solve_p1 start_state  =
-    let queue = [(0,start_state)] in
+let solve_p1 start_state =
+  let queue = [ (0, start_state) ] in
+  let visited =
+    Set.add (Set.empty (module String)) (string_of_state start_state)
+  in
 
-    let rec loop cost queue =
-      
-       if is_target state then step_count
-       else
+  let rec loop queue visited =
+    if List.is_empty queue then None
+    else
+      let queue, (cost', state) = get_state_with_lowest_cost queue in
+      Printf.printf "QL: %d\n" (List.length queue);
+      Printf.printf "%s\n" (string_of_state state);
+      Out_channel.flush stdout;
+      let _ = In_channel.input_line In_channel.stdin in
+      ();
+      if is_target state then Some cost'
+      else
+        let visited = Set.add visited (string_of_state state) in
+        let new_states = get_neighbour_states state visited in
+        let queue =
+          List.append queue
+            (List.map new_states ~f:(fun state -> (cost' + 1, state)))
+        in
 
-   let resultP1 = 0
-   let resultP2 = 0
+        loop queue visited
+  in
+  loop queue visited
+
+let resultP1 = 0
+let resultP2 = 0
