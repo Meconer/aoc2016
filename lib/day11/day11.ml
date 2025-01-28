@@ -4,6 +4,26 @@ let isExample = true
 
 type state_t = { floors : string list array; elevator_floor : int }
 
+(* Define the priority module *)
+module IntPriority = struct
+  type t = int
+
+  let compare = Int.compare
+  let equal = Int.equal
+  let hash = Hashtbl.hash
+end
+
+(* Define the value module *)
+module State = struct
+  type t = state_t
+
+  let compare = Stdlib.compare
+  let equal = ( = )
+  let hash = Hashtbl.hash
+end
+
+module StatePSQ = Psq.Make (State) (IntPriority)
+
 let floors =
   if isExample then [| [ "HYM"; "LIM" ]; [ "HYG" ]; [ "LIG" ]; [] |]
   else
@@ -31,7 +51,7 @@ let string_of_floors floors =
   String.drop_suffix s 1
 
 let string_of_state state =
-  string_of_int state.elevator_floor ^ "|" ^ string_of_floors floors
+  string_of_int state.elevator_floor ^ "|" ^ string_of_floors state.floors
 
 let is_mc s = Char.equal (String.get s 2) 'M'
 let is_gen s = Char.equal (String.get s 2) 'G'
@@ -119,44 +139,59 @@ let get_neighbour_states state visited =
       not (Set.mem visited (string_of_state state)))
 
 let get_state_with_lowest_cost queue =
-  let res =
-    List.foldi queue
-      ~init:(-1, List.hd_exn queue)
-      ~f:(fun idx acc item ->
-        let cost, _ = item in
-        if cost < fst acc then (idx, item) else acc)
-  in
-  let el_no_to_remove, item = res in
-  let new_queue = List.filteri queue ~f:(fun idx _ -> idx <> el_no_to_remove) in
-  (new_queue, item)
+  match queue with
+  | [] -> failwith "Queue is empty"
+  | _ ->
+      (* Find the element with the lowest cost *)
+      let el_no_to_remove, item =
+        List.foldi queue
+          ~init:(0, List.hd_exn queue)
+          ~f:(fun idx (min_idx, (min_cost, _)) (cost, state) ->
+            if cost < min_cost then (idx, (cost, state))
+            else (min_idx, (min_cost, state)))
+      in
+      (* Create a new queue without the element *)
+      let new_queue =
+        List.filteri queue ~f:(fun idx _ -> idx <> el_no_to_remove)
+      in
+      (new_queue, item)
 
 let solve_p1 start_state =
-  let queue = [ (0, start_state) ] in
-  let visited =
-    Set.add (Set.empty (module String)) (string_of_state start_state)
-  in
+   let queue = StatePSQ.empty in
+   let queue = StatePSQ.add 0 start_state queue in
+   let visited =
+     Set.add (Set.empty (module String)) (string_of_state start_state)
+   in
 
-  let rec loop queue visited =
-    if List.is_empty queue then None
-    else
-      let queue, (cost', state) = get_state_with_lowest_cost queue in
-      Printf.printf "QL: %d\n" (List.length queue);
-      Printf.printf "%s\n" (string_of_state state);
-      Out_channel.flush stdout;
-      let _ = In_channel.input_line In_channel.stdin in
-      ();
-      if is_target state then Some cost'
-      else
-        let visited = Set.add visited (string_of_state state) in
-        let new_states = get_neighbour_states state visited in
-        let queue =
-          List.append queue
-            (List.map new_states ~f:(fun state -> (cost' + 1, state)))
-        in
+   let rec loop queue visited =
+     if StatePSQ.is_empty queue then None
+     else
+       let popped = StatePSQ. queue in
+       match popped with
+       | None -> failwith "Cant be empty here"
+       | Some
+       let queue, (cost', state) = StatePSQ.pop queue in
+       if is_target state then Some cost'
+       else
+         let visited = Set.add visited (string_of_state state) in
+         let new_states = get_neighbour_states state visited in
+         List.iter new_states ~f:(fun el ->
+             Printf.printf "NS:  %s\n" (string_of_state el));
+         let items_to_append =
+           List.map new_states ~f:(fun st -> (cost' + 1, st))
+         in
+         List.iter items_to_append ~f:(fun el ->
+             Printf.printf "Add: %d, %s\n" (fst el) (string_of_state (snd el)));
+         let queue' = queue @ items_to_append in
+         List.iter queue' ~f:(fun el ->
+             Printf.printf "Q: %d, %s\n" (fst el) (string_of_state (snd el)));
+         Out_channel.flush stdout;
+         let _ = In_channel.input_line In_channel.stdin in
+         ();
 
-        loop queue visited
-  in
-  loop queue visited
+         loop queue' visited
+   in
+   loop queue visited
 
 let resultP1 = 0
 let resultP2 = 0

@@ -2,4 +2,4 @@
 
 (library
  (name day11)
- (libraries core))
+ (libraries core psq))
