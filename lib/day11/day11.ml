@@ -1,6 +1,6 @@
 open Core
 
-let isExample = false
+let isExample = true
 let debugflag = false
 
 type state_t = { floors : string list array; elevator_floor : int }
@@ -139,6 +139,14 @@ let move_stuff stuff_to_move state change =
       in
       new_state)
 
+let are_floors_below_empty state =
+  let rec is_empty floor =
+    if floor < 0 then true
+    else if not (List.is_empty state.floors.(floor)) then false
+    else is_empty (floor - 1)
+  in
+  is_empty (state.elevator_floor - 1)
+
 let get_neighbour_states state visited =
   let stuff_on_this_floor = Array.get state.floors state.elevator_floor in
   let stuff_to_move =
@@ -149,7 +157,9 @@ let get_neighbour_states state visited =
     if state.elevator_floor = 3 then [] else move_stuff stuff_to_move state 1
   in
   let moves_dn =
-    if state.elevator_floor = 0 then [] else move_stuff stuff_to_move state (-1)
+    if are_floors_below_empty state then []
+    else if state.elevator_floor = 0 then []
+    else move_stuff stuff_to_move state (-1)
   in
   let n_states = moves_up @ moves_dn in
   let n_states = List.filter n_states ~f:(fun state -> is_valid_state state) in
