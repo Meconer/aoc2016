@@ -1,7 +1,7 @@
 open Core
 
-let isExample = true
-let debugflag = true
+let isExample = false
+let debugflag = false
 
 type state_t = { floors : string list array; elevator_floor : int }
 
@@ -74,12 +74,13 @@ let has_single s_list is_fn =
 
 let has_single_mc s_list = has_single s_list is_mc
 let has_single_gen s_list = has_single s_list is_gen
+let has_gen s_list = List.exists s_list ~f:is_gen
 
 let is_legal_floor floor =
   if List.length floor < 2 then true
   else
     let sorted = List.sort floor ~compare:String.compare in
-    if has_single_mc sorted && has_single_gen sorted then false else true
+    if has_single_mc sorted && has_gen floor then false else true
 
 let is_legal_pair lst =
   match lst with
