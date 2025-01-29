@@ -1,6 +1,7 @@
 open Core
 
-let isExample = true
+let isExample = false
+let debugflag = false
 
 type state_t = { floors : string list array; elevator_floor : int }
 
@@ -80,6 +81,16 @@ let is_legal_floor floor =
     let sorted = List.sort floor ~compare:String.compare in
     if has_single_mc sorted && has_single_gen sorted then false else true
 
+let is_legal_pair lst =
+  match lst with
+  | [ a; b ] ->
+      let mtrla = String.sub a ~pos:0 ~len:2 in
+      let mtrlb = String.sub b ~pos:0 ~len:2 in
+      let typea = String.get a 2 in
+      let typeb = String.get b 2 in
+      String.equal mtrla mtrlb || Char.equal typea typeb
+  | _ -> failwith "Must be list with two elements"
+
 let is_target state =
   let lower_floors = Array.sub state.floors ~pos:0 ~len:3 in
   not (Array.exists lower_floors ~f:(fun floor -> not (List.is_empty floor)))
@@ -94,11 +105,18 @@ let pick_one lst =
   loop [] lst
 
 let rec pick_two lst =
-  match lst with
-  | [] -> []
-  | x :: xs ->
-      let pairs_with_x = List.map ~f:(fun y -> [ x; y ]) xs in
-      pairs_with_x @ pick_two xs
+  let pairs =
+    match lst with
+    | [] -> []
+    | x :: xs ->
+        let pairs_with_x = List.map ~f:(fun y -> [ x; y ]) xs in
+        pairs_with_x @ pick_two xs
+  in
+  let res = List.filter pairs ~f:is_legal_pair in
+  if debugflag then
+    List.iter res ~f:(fun pair ->
+        Printf.printf "Pair %s : %s \n" (List.hd_exn pair) (List.last_exn pair));
+  res
 
 let remove_stuff stuff_to_remove stuff =
   List.filter stuff ~f:(fun el ->
@@ -135,8 +153,15 @@ let get_neighbour_states state visited =
   in
   let n_states = moves_up @ moves_dn in
   let n_states = List.filter n_states ~f:(fun state -> is_valid_state state) in
-  List.filter n_states ~f:(fun state ->
-      not (Set.mem visited (string_of_state state)))
+  let size_before = List.length n_states in
+  let res_states =
+    List.filter n_states ~f:(fun state ->
+        not (Set.mem visited (string_of_state state)))
+  in
+  let size_after = List.length res_states in
+  if debugflag then
+    Printf.printf "Filter out : %d states\n" (size_before - size_after);
+  res_states
 
 let get_state_with_lowest_cost queue =
   match queue with
@@ -156,13 +181,13 @@ let get_state_with_lowest_cost queue =
       in
       (new_queue, item)
 
-let print_state state =
+let print_state state cost =
   for floor = 4 downto 1 do
     let elev = if state.elevator_floor = floor - 1 then 'E' else '.' in
     let s = string_of_floor state.floors.(floor - 1) (floor - 1) in
     Printf.printf "%d  %c %s \n" floor elev s
   done;
-  let _ = print_endline in
+  Printf.printf "Cost: %d\n\n" cost;
   Out_channel.flush stdout;
   let _ = In_channel.input_line In_channel.stdin in
   ()
@@ -181,17 +206,17 @@ let solve_p1 start_state =
       match popped with
       | None -> failwith "Cant be empty here"
       | Some ((state, cost'), queue') ->
-          print_state state;
+          if debugflag then print_state state cost';
           if is_target state then Some cost'
           else
-            let visited = Set.add visited (string_of_state state) in
-            let new_states = get_neighbour_states state visited in
+            let visited' = Set.add visited (string_of_state state) in
+            let new_states = get_neighbour_states state visited' in
             let queue' =
               List.fold new_states ~init:queue' ~f:(fun acc st ->
                   StatePSQ.add st (cost' + 1) acc)
             in
 
-            loop queue' visited
+            loop queue' visited'
   in
   loop queue visited
 
