@@ -156,9 +156,9 @@ let get_state_with_lowest_cost queue =
       in
       (new_queue, item)
 
-let solve_p1 start_state =
+(* let solve_p1 start_state =
    let queue = StatePSQ.empty in
-   let queue = StatePSQ.add 0 start_state queue in
+   let queue = StatePSQ.add  start_state 0 queue in
    let visited =
      Set.add (Set.empty (module String)) (string_of_state start_state)
    in
@@ -166,11 +166,10 @@ let solve_p1 start_state =
    let rec loop queue visited =
      if StatePSQ.is_empty queue then None
      else
-       let popped = StatePSQ. queue in
+       let popped = StatePSQ.pop queue in
        match popped with
        | None -> failwith "Cant be empty here"
-       | Some
-       let queue, (cost', state) = StatePSQ.pop queue in
+       | Some ((state,cost'), p) ->
        if is_target state then Some cost'
        else
          let visited = Set.add visited (string_of_state state) in
@@ -191,7 +190,7 @@ let solve_p1 start_state =
 
          loop queue' visited
    in
-   loop queue visited
+   loop queue visited *)
 
 let resultP1 = 0
 let resultP2 = 0
