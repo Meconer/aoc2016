@@ -163,6 +163,8 @@ let print_state state =
     Printf.printf "%d  %c %s \n" floor elev s
   done;
   let _ = print_endline in
+  Out_channel.flush stdout;
+  let _ = In_channel.input_line In_channel.stdin in
   ()
 
 let solve_p1 start_state =
@@ -179,19 +181,17 @@ let solve_p1 start_state =
       match popped with
       | None -> failwith "Cant be empty here"
       | Some ((state, cost'), queue') ->
+          print_state state;
           if is_target state then Some cost'
-          else (
-            print_state state;
+          else
             let visited = Set.add visited (string_of_state state) in
             let new_states = get_neighbour_states state visited in
-            List.iter new_states ~f:(fun el ->
-                Printf.printf "NS:  %s\n" (string_of_state el));
             let queue' =
               List.fold new_states ~init:queue' ~f:(fun acc st ->
                   StatePSQ.add st (cost' + 1) acc)
             in
 
-            loop queue' visited)
+            loop queue' visited
   in
   loop queue visited
 
