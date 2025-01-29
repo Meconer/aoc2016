@@ -156,41 +156,44 @@ let get_state_with_lowest_cost queue =
       in
       (new_queue, item)
 
-(* let solve_p1 start_state =
-   let queue = StatePSQ.empty in
-   let queue = StatePSQ.add  start_state 0 queue in
-   let visited =
-     Set.add (Set.empty (module String)) (string_of_state start_state)
-   in
+let print_state state =
+  for floor = 4 downto 1 do
+    let elev = if state.elevator_floor = floor - 1 then 'E' else '.' in
+    let s = string_of_floor state.floors.(floor - 1) (floor - 1) in
+    Printf.printf "%d  %c %s \n" floor elev s
+  done;
+  let _ = print_endline in
+  ()
 
-   let rec loop queue visited =
-     if StatePSQ.is_empty queue then None
-     else
-       let popped = StatePSQ.pop queue in
-       match popped with
-       | None -> failwith "Cant be empty here"
-       | Some ((state,cost'), p) ->
-       if is_target state then Some cost'
-       else
-         let visited = Set.add visited (string_of_state state) in
-         let new_states = get_neighbour_states state visited in
-         List.iter new_states ~f:(fun el ->
-             Printf.printf "NS:  %s\n" (string_of_state el));
-         let items_to_append =
-           List.map new_states ~f:(fun st -> (cost' + 1, st))
-         in
-         List.iter items_to_append ~f:(fun el ->
-             Printf.printf "Add: %d, %s\n" (fst el) (string_of_state (snd el)));
-         let queue' = queue @ items_to_append in
-         List.iter queue' ~f:(fun el ->
-             Printf.printf "Q: %d, %s\n" (fst el) (string_of_state (snd el)));
-         Out_channel.flush stdout;
-         let _ = In_channel.input_line In_channel.stdin in
-         ();
+let solve_p1 start_state =
+  let queue = StatePSQ.empty in
+  let queue = StatePSQ.add start_state 0 queue in
+  let visited =
+    Set.add (Set.empty (module String)) (string_of_state start_state)
+  in
 
-         loop queue' visited
-   in
-   loop queue visited *)
+  let rec loop queue visited =
+    if StatePSQ.is_empty queue then None
+    else
+      let popped = StatePSQ.pop queue in
+      match popped with
+      | None -> failwith "Cant be empty here"
+      | Some ((state, cost'), queue') ->
+          if is_target state then Some cost'
+          else (
+            print_state state;
+            let visited = Set.add visited (string_of_state state) in
+            let new_states = get_neighbour_states state visited in
+            List.iter new_states ~f:(fun el ->
+                Printf.printf "NS:  %s\n" (string_of_state el));
+            let queue' =
+              List.fold new_states ~init:queue' ~f:(fun acc st ->
+                  StatePSQ.add st (cost' + 1) acc)
+            in
+
+            loop queue' visited)
+  in
+  loop queue visited
 
 let resultP1 = 0
 let resultP2 = 0
