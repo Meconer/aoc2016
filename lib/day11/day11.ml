@@ -1,7 +1,7 @@
 open Core
 
 let isExample = true
-let debugflag = false
+let debugflag = true
 
 type state_t = { floors : string list array; elevator_floor : int }
 
@@ -116,6 +116,7 @@ let rec pick_two lst =
   if debugflag then
     List.iter res ~f:(fun pair ->
         Printf.printf "Pair %s : %s \n" (List.hd_exn pair) (List.last_exn pair));
+  if debugflag then Printf.printf "\n";
   res
 
 let remove_stuff stuff_to_remove stuff =
@@ -149,18 +150,21 @@ let are_floors_below_empty state =
 
 let get_neighbour_states state visited =
   let stuff_on_this_floor = Array.get state.floors state.elevator_floor in
-  let stuff_to_move =
-    pick_one stuff_on_this_floor @ pick_two stuff_on_this_floor
-  in
+  let singles_to_move = pick_one stuff_on_this_floor in
+  let pairs_to_move = pick_two stuff_on_this_floor in
 
   let moves_up =
-    if state.elevator_floor = 3 then [] else move_stuff stuff_to_move state 1
+    if state.elevator_floor = 3 then []
+    else move_stuff (pairs_to_move @ singles_to_move) state 1
   in
-  let moves_dn =
+
+  let stuff_to_move_down =
     if are_floors_below_empty state then []
     else if state.elevator_floor = 0 then []
-    else move_stuff stuff_to_move state (-1)
+    else if List.is_empty singles_to_move then pairs_to_move
+    else singles_to_move
   in
+  let moves_dn = move_stuff stuff_to_move_down state (-1) in
   let n_states = moves_up @ moves_dn in
   let n_states = List.filter n_states ~f:(fun state -> is_valid_state state) in
   let size_before = List.length n_states in
