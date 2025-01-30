@@ -105,6 +105,23 @@ let pick_one lst =
   in
   loop [] lst
 
+let is_compatible_pair pair =
+  match pair with
+  | [ a; b ] ->
+      String.equal (String.sub ~pos:0 ~len:2 a) (String.sub ~pos:0 ~len:2 b)
+  | _ -> failwith "Has to be a pair"
+
+let remove_extra_pairs lst =
+  let rec loop acc lst has_compat =
+    match lst with
+    | [] -> acc
+    | a :: rest ->
+        if is_compatible_pair a then
+          if has_compat then loop acc rest true else loop (a :: acc) rest true
+        else loop (a :: acc) rest has_compat
+  in
+  loop [] lst false
+
 let rec pick_two lst =
   let pairs =
     match lst with
@@ -114,6 +131,7 @@ let rec pick_two lst =
         pairs_with_x @ pick_two xs
   in
   let res = List.filter pairs ~f:is_legal_pair in
+  let res = remove_extra_pairs res in
   if debugflag then
     List.iter res ~f:(fun pair ->
         Printf.printf "Pair %s : %s \n" (List.hd_exn pair) (List.last_exn pair));
@@ -214,13 +232,21 @@ let solve_p1 start_state =
     Set.add (Set.empty (module String)) (string_of_state start_state)
   in
 
-  let rec loop queue visited =
+  let rec loop queue visited print_lim =
     if StatePSQ.is_empty queue then None
     else
       let popped = StatePSQ.pop queue in
       match popped with
       | None -> failwith "Cant be empty here"
       | Some ((state, cost'), queue') ->
+          let q_size = StatePSQ.size queue' in
+          let print_lim =
+            if q_size > print_lim then (
+              Printf.printf "QS: %d\n" q_size;
+              Out_channel.flush stdout;
+              print_lim + 100000)
+            else print_lim
+          in
           if debugflag then print_state state cost';
           if is_target state then Some cost'
           else
@@ -231,9 +257,9 @@ let solve_p1 start_state =
                   StatePSQ.add st (cost' + 1) acc)
             in
 
-            loop queue' visited'
+            loop queue' visited' print_lim
   in
-  loop queue visited
+  loop queue visited 100000
 
-let resultP1 = 0
+let resultP1 = Option.value_exn (solve_p1 start_state)
 let resultP2 = 0
