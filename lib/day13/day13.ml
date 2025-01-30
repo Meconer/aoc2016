@@ -109,5 +109,45 @@ let bfs start_state target_state df_number =
   in
   loop queue visited
 
-let result_p1 = 0
-let result_p2 = 0
+let bfs_p2 start_state df_number max_dist =
+  let queue = StatePSQ.empty in
+  let queue = StatePSQ.add start_state 0 queue in
+  let visited =
+    Set.add (Set.empty (module String)) (string_of_state start_state)
+  in
+
+  let rec loop queue visited max_count =
+    if StatePSQ.is_empty queue then max_count
+    else
+      let popped = StatePSQ.pop queue in
+      match popped with
+      | None -> failwith "Cant be empty here"
+      | Some ((state, cost'), queue') ->
+          let max_count' =
+            if cost' <= max_dist then max_count + 1 else max_count
+          in
+          if cost' > max_dist then max_count'
+          else
+            let visited' = Set.add visited (string_of_state state) in
+            let new_states = get_neighbour_states state df_number in
+            let new_states =
+              List.filter new_states ~f:(fun state ->
+                  not (Set.mem visited' (string_of_state state)))
+            in
+            let visited' =
+              List.fold new_states ~init:visited' ~f:(fun acc st ->
+                  Set.add acc (string_of_state st))
+            in
+            let queue' =
+              List.fold new_states ~init:queue' ~f:(fun acc st ->
+                  StatePSQ.add st (cost' + 1) acc)
+            in
+
+            loop queue' visited' max_count'
+  in
+  loop queue visited 0
+
+let start = { x = 1; y = 1 }
+let target = { x = 31; y = 39 }
+let result_p1 = Option.value_exn (bfs start target 1350)
+let result_p2 = bfs_p2 start 1350 50
