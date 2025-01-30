@@ -1,7 +1,8 @@
 open Core
 
-let isExample = false
-let debugflag = false
+let is_example = false
+let debug_flag = false
+let is_part_2 = false
 
 type state_t = { floors : string list array; elevator_floor : int }
 
@@ -26,7 +27,7 @@ end
 module StatePSQ = Psq.Make (State) (IntPriority)
 
 let floors =
-  if isExample then [| [ "HYM"; "LIM" ]; [ "HYG" ]; [ "LIG" ]; [] |]
+  if is_example then [| [ "HYM"; "LIM" ]; [ "HYG" ]; [ "LIG" ]; [] |]
   else
     [|
       [ "POG"; "THG"; "THM"; "PRG"; "RUG"; "RUM"; "COG"; "COM" ];
@@ -145,10 +146,10 @@ let rec pick_two lst =
   in
   let res = List.filter pairs ~f:is_legal_pair in
   let res = remove_extra_pairs res in
-  if debugflag then
+  if debug_flag then
     List.iter res ~f:(fun pair ->
         Printf.printf "Pair %s : %s \n" (List.hd_exn pair) (List.last_exn pair));
-  if debugflag then Printf.printf "\n";
+  if debug_flag then Printf.printf "\n";
   res
 
 let remove_stuff stuff_to_remove stuff =
@@ -205,7 +206,7 @@ let get_neighbour_states state visited =
         not (Set.mem visited (string_of_state state)))
   in
   let size_after = List.length res_states in
-  if debugflag then
+  if debug_flag then
     Printf.printf "Filter out : %d states\n" (size_before - size_after);
   res_states
 
@@ -260,7 +261,7 @@ let solve_p1 start_state =
               print_lim + 100000)
             else print_lim
           in
-          if debugflag then print_state state cost';
+          if debug_flag then print_state state cost';
           if is_target state then Some cost'
           else
             let visited' = Set.add visited (string_of_state state) in
