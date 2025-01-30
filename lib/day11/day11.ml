@@ -252,6 +252,10 @@ let solve_p1 start_state =
           else
             let visited' = Set.add visited (string_of_state state) in
             let new_states = get_neighbour_states state visited' in
+            let visited' =
+              List.fold new_states ~init:visited' ~f:(fun acc st ->
+                  Set.add acc (string_of_state st))
+            in
             let queue' =
               List.fold new_states ~init:queue' ~f:(fun acc st ->
                   StatePSQ.add st (cost' + 1) acc)
