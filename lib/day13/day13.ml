@@ -30,13 +30,13 @@ module StatePSQ = Psq.Make (State) (IntPriority)
 
 let string_of_state state = string_of_int state.x ^ ":" ^ string_of_int state.y
 
-let rec get_binary number =
+let get_binary number =
   let rec loop number =
     if number <= 1 then [ number ]
     else
       let half = number / 2 in
       let rest = number mod 2 in
-      rest :: List.rev (get_binary half)
+      rest :: loop half
   in
 
   List.rev (loop number)
