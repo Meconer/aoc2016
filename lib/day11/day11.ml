@@ -26,7 +26,7 @@ end
 
 module StatePSQ = Psq.Make (State) (IntPriority)
 
-let floors =
+let floors is_part_2 =
   if is_example then [| [ "HYM"; "LIM" ]; [ "HYG" ]; [ "LIG" ]; [] |]
   else if is_part_2 then
     [|
@@ -56,7 +56,7 @@ let floors =
       [];
     |]
 
-let start_state = { floors; elevator_floor = 0 }
+let start_state is_part_2 = { floors = floors is_part_2; elevator_floor = 0 }
 
 let is_pair el1 el2 =
   String.equal (String.sub ~pos:0 ~len:2 el1) (String.sub ~pos:0 ~len:2 el2)
@@ -299,5 +299,5 @@ let solve_p1 start_state =
   in
   loop queue visited 100000
 
-let resultP1 = Option.value_exn (solve_p1 start_state)
-let resultP2 = 0
+let resultP1 = Option.value_exn (solve_p1 (start_state false))
+let resultP2 = Option.value_exn (solve_p1 (start_state true))
