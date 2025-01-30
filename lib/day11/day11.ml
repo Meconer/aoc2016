@@ -2,7 +2,7 @@ open Core
 
 let is_example = false
 let debug_flag = false
-let is_part_2 = false
+let is_part_2 = true
 
 type state_t = { floors : string list array; elevator_floor : int }
 
@@ -28,6 +28,26 @@ module StatePSQ = Psq.Make (State) (IntPriority)
 
 let floors =
   if is_example then [| [ "HYM"; "LIM" ]; [ "HYG" ]; [ "LIG" ]; [] |]
+  else if is_part_2 then
+    [|
+      [
+        "POG";
+        "THG";
+        "THM";
+        "PRG";
+        "RUG";
+        "RUM";
+        "COG";
+        "COM";
+        "ELG";
+        "ELM";
+        "DIG";
+        "DIM";
+      ];
+      [ "POM"; "PRM" ];
+      [];
+      [];
+    |]
   else
     [|
       [ "POG"; "THG"; "THM"; "PRG"; "RUG"; "RUM"; "COG"; "COM" ];
