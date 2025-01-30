@@ -28,6 +28,8 @@ end
 
 module StatePSQ = Psq.Make (State) (IntPriority)
 
+let string_of_state state = string_of_int state.x ^ ":" ^ string_of_int state.y
+
 let rec get_binary number =
   let rec loop number =
     if number <= 1 then [ number ]
@@ -67,31 +69,33 @@ let print_board cols rows dfnumber =
   in
   row_loop 0
 
-let dijkstra start_state target_state =
+let get_neighbour_states state df_number =
+  let delta = [ (0, 1); (0, -1); (1, 0); (-1, 0) ] in
+  let neighbours =
+    List.map delta ~f:(fun d -> { x = state.x + fst d; y = state.y + snd d })
+    |> List.filter ~f:(fun coord -> coord.x >= 0 && coord.y >= 0)
+    |> List.filter ~f:(fun coord -> Char.equal (wall_func coord df_number) '.')
+  in
+  neighbours
+
+let bfs start_state target_state df_number =
   let queue = StatePSQ.empty in
   let queue = StatePSQ.add start_state 0 queue in
-  let visited = Set.add (Set.empty (module State)) start_state in
+  let visited =
+    Set.add (Set.empty (module String)) (string_of_state start_state)
+  in
 
-  let rec loop queue visited print_lim =
+  let rec loop queue visited =
     if StatePSQ.is_empty queue then None
     else
       let popped = StatePSQ.pop queue in
       match popped with
       | None -> failwith "Cant be empty here"
       | Some ((state, cost'), queue') ->
-          let q_size = StatePSQ.size queue' in
-          let print_lim =
-            if q_size > print_lim then (
-              Printf.printf "QS: %d\n" q_size;
-              Out_channel.flush stdout;
-              print_lim + 100000)
-            else print_lim
-          in
-          if debug_flag then print_state state cost';
-          if is_target state then Some cost'
+          if State.equal target_state state then Some cost'
           else
             let visited' = Set.add visited (string_of_state state) in
-            let new_states = get_neighbour_states state visited' in
+            let new_states = get_neighbour_states state df_number in
             let visited' =
               List.fold new_states ~init:visited' ~f:(fun acc st ->
                   Set.add acc (string_of_state st))
@@ -101,9 +105,9 @@ let dijkstra start_state target_state =
                   StatePSQ.add st (cost' + 1) acc)
             in
 
-            loop queue' visited' print_lim
+            loop queue' visited'
   in
-  loop queue visited 100000
+  loop queue visited
 
 let result_p1 = 0
 let result_p2 = 0
