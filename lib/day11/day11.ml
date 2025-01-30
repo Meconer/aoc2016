@@ -37,10 +37,26 @@ let floors =
 
 let start_state = { floors; elevator_floor = 0 }
 
+let is_pair el1 el2 =
+  String.equal (String.sub ~pos:0 ~len:2 el1) (String.sub ~pos:0 ~len:2 el2)
+
+let replace_compat_pairs_with_cp lst =
+  let rec loop acc lst =
+    match lst with
+    | [] -> List.rev acc
+    | a :: [] -> List.rev (a :: acc)
+    | a :: b :: rest ->
+        if is_pair a b then loop ("CCP" :: acc) rest
+        else loop (a :: acc) (b :: rest)
+  in
+  loop [] lst
+
 let string_of_floor floor floor_no =
+  let sorted = List.sort floor ~compare:String.compare in
+  let n_floor = replace_compat_pairs_with_cp sorted in
   let s =
     string_of_int floor_no ^ "%"
-    ^ List.fold floor ~init:"" ~f:(fun acc el -> acc ^ el ^ "/")
+    ^ List.fold n_floor ~init:"" ~f:(fun acc el -> acc ^ el ^ "/")
   in
   if List.is_empty floor then s else String.drop_suffix s 1
 
@@ -56,9 +72,6 @@ let string_of_state state =
 
 let is_mc s = Char.equal (String.get s 2) 'M'
 let is_gen s = Char.equal (String.get s 2) 'G'
-
-let is_pair el1 el2 =
-  String.equal (String.sub ~pos:0 ~len:2 el1) (String.sub ~pos:0 ~len:2 el2)
 
 let has_single s_list is_fn =
   let rec loop s_list =
