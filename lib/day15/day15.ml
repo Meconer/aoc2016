@@ -41,5 +41,25 @@ let find_common disc_1 disc_2 start diff =
   let second = loop (first + 1) in
   (first, second)
 
+let discs = parse_input aoc_input
+
+let solve_p1 discs =
+  let start, next =
+    find_common (List.hd_exn discs) (List.nth_exn discs 1) 0 1
+  in
+  let diff = next - start in
+  let rec loop disc_idx start diff =
+    if disc_idx >= List.length discs then start
+    else
+      let disc = List.nth_exn discs disc_idx in
+      let rec find_next disc time diff =
+        let pos = pos_for_disc_at_time disc time in
+        if pos = 0 then time else find_next disc (time + diff) diff
+      in
+      let next = find_next disc start diff  in
+      next in
+  let next = loop 2 start diff in
+  
+
 let result_p1 = 0
 let result_p2 = 0
