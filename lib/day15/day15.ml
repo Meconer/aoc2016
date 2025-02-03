@@ -47,13 +47,19 @@ let solve_p1 discs =
   let rec find_zero_loop acc disc time diff =
     let p = pos_for_disc_at_time disc time in
     if p = 0 then
-      if List.length acc = 2 then acc
+      if List.length acc = 2 then (List.hd_exn acc, List.last_exn acc)
       else find_zero_loop (time :: acc) disc (time + diff) diff
     else find_zero_loop acc disc (time + diff) diff
   in
 
-  let zeros = find_zero_loop [] (List.hd_exn discs) 0 1 in
-  zeros
+  let rec disc_loop acc discs =
+    match discs with
+    | [] -> List.rev acc
+    | disc :: rest ->
+        let zeros = find_zero_loop [] disc 0 1 in
+        disc_loop (zeros :: acc) rest
+  in
+  disc_loop [] discs
 
 let result_p1 = 0
 let result_p2 = 0
