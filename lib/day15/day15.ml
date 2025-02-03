@@ -43,23 +43,28 @@ let find_common disc_1 disc_2 start diff =
 
 let discs = parse_input aoc_input
 
-let solve_p1 discs =
+let solve discs =
   let rec find_zero_loop acc disc time diff =
     let p = pos_for_disc_at_time disc time in
     if p = 0 then
-      if List.length acc = 2 then (List.hd_exn acc, List.last_exn acc)
+      if List.length acc = 2 then
+        let start = List.last_exn acc in
+        let next = List.hd_exn acc in
+        (start, next - start)
       else find_zero_loop (time :: acc) disc (time + diff) diff
     else find_zero_loop acc disc (time + diff) diff
   in
 
-  let rec disc_loop acc discs =
+  let rec disc_loop acc discs start diff =
     match discs with
     | [] -> List.rev acc
     | disc :: rest ->
-        let zeros = find_zero_loop [] disc 0 1 in
-        disc_loop (zeros :: acc) rest
-  in
-  disc_loop [] discs
+        let zeros = find_zero_loop [] disc start diff in
 
-let result_p1 = 0
-let result_p2 = 0
+        disc_loop (zeros :: acc) rest (fst zeros) (snd zeros)
+  in
+  disc_loop [] discs 0 1
+
+let result_p1 = fst (List.last_exn (solve discs))
+let discs_p2 = discs @ [ { idx = 7; no_of_pos = 11; start_pos = 0 } ]
+let result_p2 = fst (List.last_exn (solve discs_p2))
