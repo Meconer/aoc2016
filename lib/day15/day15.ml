@@ -27,10 +27,10 @@ let pos_for_disc_at_time disc time =
 
 let find_common disc_1 disc_2 start diff =
   (* pos = (time + idx + start_pos) mod n_pos
-    0 = (t + i + s) mod np => t =  n * (np - s - i)
-    For the first example disc n * (5 - 4 - 1) gives 0 if we start at time 0, 5, 10, 15, 20 etc
-    For the second disc n * (2 - 1 - 2) gives 0 at 1, 3, 5, 7 etc. First common pos at t=5. 
-    Next time is at 15. Diff is 5 * 2 = 10 
+     0 = (t + i + s) mod np => t =  n * (np - s - i)
+     For the first example disc n * (5 - 4 - 1) gives 0 if we start at time 0, 5, 10, 15, 20 etc
+     For the second disc n * (2 - 1 - 2) gives 0 at 1, 3, 5, 7 etc. First common pos at t=5.
+     Next time is at 15. Diff is 5 * 2 = 10
   *)
   let rec loop time =
     let pos_1 = pos_for_disc_at_time disc_1 time in
@@ -44,22 +44,16 @@ let find_common disc_1 disc_2 start diff =
 let discs = parse_input aoc_input
 
 let solve_p1 discs =
-  let start, next =
-    find_common (List.hd_exn discs) (List.nth_exn discs 1) 0 1
+  let rec find_zero_loop acc disc time diff =
+    let p = pos_for_disc_at_time disc time in
+    if p = 0 then
+      if List.length acc = 2 then acc
+      else find_zero_loop (time :: acc) disc (time + diff) diff
+    else find_zero_loop acc disc (time + diff) diff
   in
-  let diff = next - start in
-  let rec loop disc_idx start diff =
-    if disc_idx >= List.length discs then start
-    else
-      let disc = List.nth_exn discs disc_idx in
-      let rec find_next disc time diff =
-        let pos = pos_for_disc_at_time disc time in
-        if pos = 0 then time else find_next disc (time + diff) diff
-      in
-      let next = find_next disc start diff  in
-      next in
-  let next = loop 2 start diff in
-  
+
+  let zeros = find_zero_loop [] (List.hd_exn discs) 0 1 in
+  zeros
 
 let result_p1 = 0
 let result_p2 = 0
