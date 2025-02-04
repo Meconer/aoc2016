@@ -26,6 +26,8 @@ let () =
      Printf.printf "Result Day13 part 1 %d\n" Day13.result_p1;
      Printf.printf "Result Day13 part 2 %d\n" Day13.result_p2;
      Printf.printf "Result Day14 part 1 %d\n" Day14.result_p1;
-     Printf.printf "Result Day14 part 2 %d\n" Day14.result_p2; *)
-  Printf.printf "Result Day15 part 1 %d\n" Day15.result_p1;
-  Printf.printf "Result Day15 part 2 %d\n" Day15.result_p2
+     Printf.printf "Result Day14 part 2 %d\n" Day14.result_p2;
+     Printf.printf "Result Day15 part 1 %d\n" Day15.result_p1;
+     Printf.printf "Result Day15 part 2 %d\n" Day15.result_p2; *)
+  Printf.printf "Result Day16 part 1 %s\n" Day16.result_p1;
+  Printf.printf "Result Day16 part 2 %s\n" Day16.result_p2
