@@ -109,4 +109,33 @@ let res =
   | None -> "No result"
 
 let result_p1 = res
-let result_p2 = ""
+
+let solve_p2 start target pass_code =
+  let path = pass_code in
+  let queue = StatePSQ.((add (start, path) 0) empty) in
+
+  let rec loop acc queue =
+    if StatePSQ.is_empty queue then acc
+    else
+      let popped = StatePSQ.pop queue in
+      match popped with
+      | None -> failwith "Empty! Wtf?"
+      | Some (((pos, path), dist), queue) ->
+          if State.equal pos target then loop (String.length path :: acc) queue
+          else
+            let neighbours = get_neighbour_states path pos in
+            let q =
+              List.fold neighbours ~init:queue ~f:(fun q neighbour ->
+                  let new_pos, _, new_path = neighbour in
+                  StatePSQ.add (new_pos, new_path) (dist + 1) q)
+            in
+            loop acc q
+  in
+
+  loop [] queue
+
+let path_lengths = solve_p2 start target pass_code
+
+let result_p2 =
+  (List.sort path_lengths ~compare:Int.descending |> List.hd_exn)
+  - String.length pass_code

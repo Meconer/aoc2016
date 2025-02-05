@@ -32,4 +32,4 @@ let () =
      Printf.printf "Result Day16 part 1 %s\n" Day16.result_p1;
      Printf.printf "Result Day16 part 2 %s\n" Day16.result_p2; *)
   Printf.printf "Result Day17 part 1 %s\n" Day17.result_p1;
-  Printf.printf "Result Day17 part 2 %s\n" Day17.result_p2
+  Printf.printf "Result Day17 part 2 %d\n" Day17.result_p2
