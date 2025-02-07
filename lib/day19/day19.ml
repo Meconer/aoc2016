@@ -1,7 +1,7 @@
 open Core
 
 let is_example = true
-let no_of_elfs = if is_example then 5 else 3014387
+let no_of_elfs = if is_example then 11 else 3014387
 
 type node_t = { idx : int; count : int }
 
@@ -19,6 +19,10 @@ let rec get_next_elfs_present start_pos pos =
 let solve elfs start =
   let rec loop pos =
     let this_elf = elfs.(pos) in
+    Array.iter elfs ~f:(fun el ->
+        Printf.printf "idx %d, c: %d\n" el.idx el.count);
+    Out_channel.flush stdout;
+    let _ = In_channel.input_line In_channel.stdin in
     if this_elf.count = 0 then loop ((pos + 1) mod no_of_elfs)
     else
       let next_count = get_next_elfs_present pos ((pos + 1) mod no_of_elfs) in
