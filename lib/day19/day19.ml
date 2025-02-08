@@ -38,8 +38,7 @@ let solve elfs start =
   in
   loop start
 
-let result_p1 = 0
-(* let result_p1 = solve !elfs 0 *)
+let result_p1 = solve !elfs 0
 
 (* Reset elfs *)
 let elfs = ref (Array.init no_of_elfs ~f:(fun i -> { idx = i + 1; count = 1 }))
@@ -96,7 +95,7 @@ let solve_p2 no_of_elfs start =
   loop start
 
 let rec loop count =
-  if count = 800 then ()
+  if count = 130 then ()
   else
     let winner = solve_p2 count 0 in
     Printf.printf "C: %d - Winner %d\n" count winner;
@@ -107,6 +106,15 @@ let rec loop count =
 *)
 
 let predict_winner no_of_elfs =
-  if 
-let x = solve_p2 5 0
-let result_p2 = x
+  if no_of_elfs < 3 then 1
+  else
+    let rec loop count start winner =
+      (* Printf.printf "c: %d - w: %d \n" count winner; *)
+      if count >= no_of_elfs then winner
+      else if count = start * 3 then loop (count + 1) count 1
+      else if count >= start * 2 then loop (count + 1) start (winner + 2)
+      else loop (count + 1) start (winner + 1)
+    in
+    loop 3 1 3
+
+let result_p2 = predict_winner no_of_elfs
