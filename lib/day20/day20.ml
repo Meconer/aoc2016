@@ -12,21 +12,16 @@ let get_interval_of_line line =
   let parts = String.split line ~on:'-' |> List.map ~f:int_of_string in
   (List.hd_exn parts, List.last_exn parts)
 
-let in_interval range no =
-  no >= fst range && no <= snd range
-
-let calc_resulting_invalids sorted =
+let merge_intervals sorted =
   let rec loop acc sorted =
-    match sorted with 
+    match sorted with
     | [] -> acc
-    | interval :: rest -> 
-      let start, stop = interval in
-      if List.is_empty acc then loop [(start, stop)] rest
-      else
-        let n_acc = List.fold ~init:acc ~f:(fun acc el ->
-            if in_interval el start then 
-          )
-
+    | a :: [] -> a :: acc
+    | a :: b :: rest ->
+        if snd a < fst b - 1 then loop (a :: acc) (b :: rest)
+        else loop acc ((fst a, max (snd a) (snd b)) :: rest)
+  in
+  loop [] sorted
 
 let solve_p1 lines =
   let rec get_intervals intervals lines =
@@ -40,8 +35,41 @@ let solve_p1 lines =
   let sorted =
     List.sort invalids ~compare:(fun a b -> Int.compare (fst a) (fst b))
   in
-  let invalids = calc_resulting_invalids sorted in
-  invalids
+  let invalids = merge_intervals sorted in
+  let sorted =
+    List.sort invalids ~compare:(fun a b -> Int.compare (fst a) (fst b))
+  in
+  snd (List.hd_exn sorted) + 1
 
-let result_p1 = 0
-let result_p2 = 0
+let result_p1 = solve_p1 aoc_input
+
+let count_free sorted max_valid =
+  let rec loop acc sorted =
+    match sorted with
+    | [] -> acc
+    | a :: [] -> acc + max_valid - snd a
+    | a :: b :: rest ->
+        let n_acc = acc + fst b - snd a - 1 in
+        loop n_acc (b :: rest)
+  in
+  loop 0 sorted
+
+let solve_p2 lines =
+  let rec get_intervals intervals lines =
+    match lines with
+    | [] -> intervals
+    | hd :: tl ->
+        let start, stop = get_interval_of_line hd in
+        get_intervals ((start, stop) :: intervals) tl
+  in
+  let invalids = get_intervals [] lines in
+  let sorted =
+    List.sort invalids ~compare:(fun a b -> Int.compare (fst a) (fst b))
+  in
+  let invalids = merge_intervals sorted in
+  let sorted =
+    List.sort invalids ~compare:(fun a b -> Int.compare (fst a) (fst b))
+  in
+  count_free sorted max_valid
+
+let result_p2 = solve_p2 aoc_input
