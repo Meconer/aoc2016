@@ -27,7 +27,6 @@ type command = {
 }
 
 let command_of_line line =
-  Printf.printf "%s\n" line;
   match line with
   | line when String.is_prefix line ~prefix:"swap position" ->
       let pos_a, pos_b =
@@ -154,7 +153,6 @@ let reverse s pos_a pos_b =
   s1 ^ s2 ^ s3
 
 let move_pos s pos_a pos_b =
-  (* Printf.printf "Move %s\n" s; *)
   if pos_b > pos_a then
     let s1 = String.sub s ~pos:0 ~len:pos_a in
     let sm = String.sub s ~pos:pos_a ~len:1 in
@@ -163,17 +161,13 @@ let move_pos s pos_a pos_b =
     s1 ^ s2 ^ sm ^ s3
   else
     let s1 = String.sub s ~pos:0 ~len:pos_b in
-    (* Printf.printf "s1: %s\n" s1; *)
     let sm = String.sub s ~pos:pos_a ~len:1 in
-    (* Printf.printf "sm: %s\n" sm; *)
     let s2 = String.sub s ~pos:pos_b ~len:(pos_a - pos_b) in
-    (* Printf.printf "s2: %s\n" s2; *)
     let s3 =
       if pos_a < String.length s - 1 then
         String.sub s ~pos:(pos_a + 1) ~len:(String.length s - pos_a - 1)
       else ""
     in
-    (* Printf.printf "s3: %s\n" s3; *)
     s1 ^ sm ^ s2 ^ s3
 
 let rotate_on_letter_rev s c =
@@ -183,8 +177,9 @@ let rotate_on_letter_rev s c =
     let original_pos =
       if idx mod 2 = 1 then idx / 2 else if idx = 0 then 7 else 4 + (idx / 2)
     in
-    Printf.printf "idx: %d - org: %d" idx original_pos;
-    move_pos s idx original_pos
+    if original_pos = 7 && idx = 0 then rotate_left s 1
+    else if original_pos > idx then rotate_right s (original_pos - idx - 1)
+    else rotate_left s (idx - original_pos)
 
 let do_command command s =
   match command.command with
@@ -230,4 +225,4 @@ let solve_p2 lines s =
   in
   loop s (List.rev lines)
 
-let result_p2 = ""
+let result_p2 = solve_p2 aoc_input "fbgdceah"
