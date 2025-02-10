@@ -177,6 +177,15 @@ let move_pos s pos_a pos_b =
     Printf.printf "s3: %s\n" s3;
     s1 ^ sm ^ s2 ^ s3
 
+let rotate_on_letter_rev s c =
+  if String.length s <> 8 then failwith "Works only on str length of 8"
+  else
+    let idx = String.index_exn s c in
+    let original_pos =
+      if idx mod 2 = 1 then idx / 2 else if idx = 0 then 7 else 4 + (idx / 2)
+    in
+    move_pos s idx original_pos
+
 let do_command command s =
   match command.command with
   | Swap_Pos -> swap_pos s command.pos_a command.pos_b
@@ -186,6 +195,16 @@ let do_command command s =
   | Rotate_Pos -> rotate_on_letter s command.letter_a
   | Reverse_Pos -> reverse s command.pos_a command.pos_b
   | Move_Pos -> move_pos s command.pos_a command.pos_b
+
+let do_rev_command command s =
+  match command.command with
+  | Swap_Pos -> swap_pos s command.pos_a command.pos_b
+  | Swap_Letter -> swap_letter s command.letter_a command.letter_b
+  | Rotate_Left -> rotate_right s command.no_steps
+  | Rotate_Right -> rotate_left s command.no_steps
+  | Rotate_Pos -> rotate_on_letter_rev s command.letter_a
+  | Reverse_Pos -> reverse s command.pos_a command.pos_b
+  | Move_Pos -> move_pos s command.pos_b command.pos_a
 
 let solve_p1 lines s =
   let rec loop s lines =
@@ -199,4 +218,16 @@ let solve_p1 lines s =
   loop s lines
 
 let result_p1 = solve_p1 aoc_input password
+
+let solve_p2 lines s =
+  let rec loop s lines =
+    match lines with
+    | [] -> s
+    | hd :: tl ->
+        let command = command_of_line hd in
+        let s = do_rev_command command s in
+        loop s tl
+  in
+  loop s (List.rev lines)
+
 let result_p2 = ""
