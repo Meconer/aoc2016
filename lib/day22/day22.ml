@@ -95,4 +95,17 @@ let build_grid lines =
 
 let grid, x_max, y_max = build_grid node_lines
 let _ = print_grid grid x_max y_max
+
+type pos_t = { x : int; y : int }
+type move_t = { from_p : pos_t; to_p : pos_t }
+
+let build_moves () =
+  let moves =
+    List.init 17 ~f:(fun i ->
+        [ { from_p = { x = 16 - i; y = 22 }; to_p = { x = 17 - i; y = 22 } } ])
+  in
+  moves
+
+let do_move move grid =
+  
 let result_p2 = 0
