@@ -6,16 +6,13 @@ let filename =
   if isExample then "lib/day22/example.txt" else "lib/day22/input.txt"
 
 let aoc_input = In_channel.read_lines filename
-let aoc_input = List.sub aoc_input ~pos:2 ~len:(List.length aoc_input - 2)
+let node_lines = List.sub aoc_input ~pos:2 ~len:(List.length aoc_input - 2)
 
 type node_t = { x : int; y : int; size : int; used : int }
 
 let string_of_node node =
-  let s =
-    Printf.sprintf "Node-x%d-y%d s:%d u:%d a:%d" node.x node.y node.size
-      node.used (node.size - node.used)
-  in
-  s
+  Printf.sprintf "Node-x%d-y%d s:%d u:%d a:%d" node.x node.y node.size node.used
+    (node.size - node.used)
 
 let print_node node = Printf.printf "%s\n" (string_of_node node)
 
@@ -38,21 +35,22 @@ let find_pairs nodes =
                 if a_node.x = b_node.x && a_node.y = b_node.y then acc
                 else
                   let b_avail = b_node.size - b_node.used in
-                  if a_node.size <= b_avail then (
-                    print_node a_node;
-                    Printf.printf "  - %s\n" (string_of_node b_node);
-                    Out_channel.flush stdout;
-                    Printf.printf "accepted\n";
-                    Out_channel.flush stdout;
-                    let _ = In_channel.input_line In_channel.stdin in
-                    (a_node, b_node) :: acc)
-                  else acc)
+                  let a_avail = a_node.size - a_node.used in
+                  let p =
+                    if a_node.used <= b_avail && a_node.used > 0 then
+                      [ (a_node, b_node) ]
+                    else []
+                  in
+                  let p =
+                    if b_node.used <= a_avail && b_node.used > 0 then
+                      (b_node, a_node) :: p
+                    else p
+                  in
+                  p @ acc)
           in
           loop (pairs @ acc_pairs) tail
   in
   loop [] nodes
-
-(* 748 too low *)
 
 let solve_p1 lines =
   let nodes = List.map lines ~f:get_node in
@@ -64,5 +62,37 @@ let solve_p1 lines =
       Printf.printf "%s  --  %s\n" sa sb);
   List.length pairs
 
-let result_p1 = 0
+let string_of_xy x y = Printf.sprintf "%d:%d" x y
+
+let node_str node =
+  let s1 = string_of_int node.used in
+  let s1 = String.pad_left s1 ~len:4 in
+  let s2 = string_of_int node.size in
+  let s2 = String.pad_right s2 ~len:4 in
+  s1 ^ "/" ^ s2
+
+let print_grid node_map x_max y_max =
+  for y = 0 to y_max do
+    for x = 0 to x_max do
+      let key = string_of_xy x y in
+      let node = Hashtbl.find_exn node_map key in
+      let s = node_str node in
+      Printf.printf "%s" s
+    done;
+    Printf.printf "\n"
+  done
+
+let result_p1 = solve_p1 node_lines
+
+let build_grid lines =
+  let nodes = List.map lines ~f:get_node in
+  let node_map = Hashtbl.create (module String) in
+  let x_max = List.fold nodes ~init:0 ~f:(fun m node -> max m node.x) in
+  let y_max = List.fold nodes ~init:0 ~f:(fun m node -> max m node.y) in
+  List.iter nodes ~f:(fun node ->
+      Hashtbl.add_exn node_map ~key:(string_of_xy node.x node.y) ~data:node);
+  (node_map, x_max, y_max)
+
+let grid, x_max, y_max = build_grid node_lines
+let _ = print_grid grid x_max y_max
 let result_p2 = 0
