@@ -55,11 +55,6 @@ let find_pairs nodes =
 let solve_p1 lines =
   let nodes = List.map lines ~f:get_node in
   let pairs = find_pairs nodes in
-  List.iter pairs ~f:(fun pair ->
-      let a, b = pair in
-      let sa = string_of_node a in
-      let sb = string_of_node b in
-      Printf.printf "%s  --  %s\n" sa sb);
   List.length pairs
 
 let string_of_xy x y = Printf.sprintf "%d:%d" x y
@@ -94,7 +89,6 @@ let build_grid lines =
   (node_map, x_max, y_max)
 
 let grid, x_max, y_max = build_grid node_lines
-let _ = print_grid grid x_max y_max
 
 type pos_t = { x : int; y : int }
 type move_t = { from_p : pos_t; to_p : pos_t }
@@ -102,15 +96,34 @@ type move_t = { from_p : pos_t; to_p : pos_t }
 let string_of_pos pos = string_of_xy pos.x pos.y
 
 let build_moves () =
+  (* Moves the 0 slot all the way to the left *)
   let moves_left =
     List.init 17 ~f:(fun i ->
         { from_p = { x = 16 - i; y = 22 }; to_p = { x = 17 - i; y = 22 } })
   in
+  (* Moves the 0 slot up to 0 0  *)
   let moves_up =
     List.init 22 ~f:(fun i ->
         { from_p = { x = 0; y = 21 - i }; to_p = { x = 0; y = 22 - i } })
   in
-  moves_left @ moves_up
+  (* Moves the 0 slot all the way to the right *)
+  let moves_right =
+    List.init x_max ~f:(fun i ->
+        { from_p = { x = i + 1; y = 0 }; to_p = { x = i; y = 0 } })
+  in
+  let moves_around xr =
+    [
+      { from_p = { x = xr + 1; y = 1 }; to_p = { x = xr + 1; y = 0 } };
+      { from_p = { x = xr; y = 1 }; to_p = { x = xr + 1; y = 1 } };
+      { from_p = { x = xr - 1; y = 1 }; to_p = { x = xr; y = 1 } };
+      { from_p = { x = xr - 1; y = 0 }; to_p = { x = xr - 1; y = 1 } };
+      { from_p = { x = xr; y = 0 }; to_p = { x = xr - 1; y = 0 } };
+    ]
+  in
+  let moves_for_top_row =
+    List.range 1 x_max |> List.rev |> List.concat_map ~f:moves_around
+  in
+  moves_left @ moves_up @ moves_right @ moves_for_top_row
 
 let do_move move grid =
   let to_node = Hashtbl.find_exn grid (string_of_pos move.to_p) in
@@ -124,4 +137,14 @@ let do_move move grid =
     Hashtbl.set grid ~key:(string_of_pos move.from_p) ~data:from_node;
     ()
 
-let result_p2 = 0
+(*
+   By printing the grid I found out how to move
+   the only node that could fit the data in most cells.
+   I made the function build_moves and do_move to test the
+   list and help me build it. When I finally got the data 
+   moved from cell 37,0 to 0,0 I just got the length of the
+   list
+*)
+let moves = build_moves ()
+let _ = List.iter moves ~f:(fun move -> do_move move grid)
+let result_p2 = List.length moves
