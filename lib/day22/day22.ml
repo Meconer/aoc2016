@@ -99,13 +99,25 @@ let _ = print_grid grid x_max y_max
 type pos_t = { x : int; y : int }
 type move_t = { from_p : pos_t; to_p : pos_t }
 
+let string_of_pos pos = string_of_xy pos.x pos.y
+
 let build_moves () =
   let moves =
     List.init 17 ~f:(fun i ->
-        [ { from_p = { x = 16 - i; y = 22 }; to_p = { x = 17 - i; y = 22 } } ])
+        { from_p = { x = 16 - i; y = 22 }; to_p = { x = 17 - i; y = 22 } })
   in
   moves
 
 let do_move move grid =
-  
+  let to_node = Hashtbl.find_exn grid (string_of_pos move.to_p) in
+  let from_node = Hashtbl.find_exn grid (string_of_pos move.from_p) in
+  let avail = to_node.size - to_node.used in
+  if avail < from_node.used then failwith "Illegal move. No room"
+  else
+    let to_node = { to_node with used = to_node.used + from_node.used } in
+    let from_node = { from_node with used = 0 } in
+    Hashtbl.set grid ~key:(string_of_pos move.to_p) ~data:to_node;
+    Hashtbl.set grid ~key:(string_of_pos move.from_p) ~data:from_node;
+    ()
+
 let result_p2 = 0
