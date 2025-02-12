@@ -102,11 +102,15 @@ type move_t = { from_p : pos_t; to_p : pos_t }
 let string_of_pos pos = string_of_xy pos.x pos.y
 
 let build_moves () =
-  let moves =
+  let moves_left =
     List.init 17 ~f:(fun i ->
         { from_p = { x = 16 - i; y = 22 }; to_p = { x = 17 - i; y = 22 } })
   in
-  moves
+  let moves_up =
+    List.init 22 ~f:(fun i ->
+        { from_p = { x = 0; y = 21 - i }; to_p = { x = 0; y = 22 - i } })
+  in
+  moves_left @ moves_up
 
 let do_move move grid =
   let to_node = Hashtbl.find_exn grid (string_of_pos move.to_p) in
