@@ -71,11 +71,12 @@ let do_tgl line regs ip program =
   | None -> failwith "Wrong format for tgl"
   | Some x -> (
       let ip_to_change = ip + get_reg_value x regs in
-      Printf.printf "ip_to_change %d" ip_to_change;
+      Printf.printf "ip_to_change %d\n" ip_to_change;
       if ip_to_change < 0 || ip_to_change >= Array.length program then
         (ip, regs, program)
       else
         let instr_line_to_toggle = program.(ip_to_change) in
+        (* Printf.printf "instr_line_to_toggle %s\n" instr_line_to_toggle; *)
         match instr_line_to_toggle with
         | line when String.is_prefix line ~prefix:"cpy" ->
             let n_line = "jnz" ^ String.chop_prefix_exn line ~prefix:"cpy" in
@@ -93,6 +94,10 @@ let do_tgl line regs ip program =
             let n_line = "inc" ^ String.chop_prefix_exn line ~prefix:"tgl" in
             Array.set program ip_to_change n_line;
             (ip, regs, program)
+        | line when String.is_prefix line ~prefix:"jnz" ->
+            let n_line = "cpy" ^ String.chop_prefix_exn line ~prefix:"jnz" in
+            Array.set program ip_to_change n_line;
+            (ip, regs, program)
         | _ -> failwith "Illegal instr")
 
 let print_status line ip regs program =
@@ -105,7 +110,7 @@ let print_status line ip regs program =
   ()
 
 let exec_line line ip regs program =
-  print_status line ip regs program;
+  (* print_status line ip regs program; *)
   (* print_regs regs; *)
   match line with
   | line when String.is_prefix line ~prefix:"cpy" ->
@@ -137,5 +142,7 @@ let solve program regs =
   loop 0 regs program
 
 let p1_regs = solve program { a = 7; b = 0; c = 0; d = 0 }
-let result_p1 = 0
+let result_p1 = p1_regs.a
+let program = Array.of_list aoc_input
+let p2_regs = solve program { a = 5; b = 0; c = 0; d = 0 }
 let result_p2 = 0
