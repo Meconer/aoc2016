@@ -26,3 +26,6 @@ C:  d--
     tgl c
     c = -16
     
+...
+
+Didnt finish this pseudo code but I found out that the code solves n! + c where c = 81*73 in my case
