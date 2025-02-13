@@ -1,4 +1,4 @@
-a = 0 
+a = input
 b = 0 
 c = 0
 d = 0
@@ -12,7 +12,7 @@ B:  c = b
 
 A:  a++
     c--
-    if c <> 0 0 then A
+    if c <> 0 then A
     d--
     if d <> 0 then B
     b--

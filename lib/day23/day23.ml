@@ -144,5 +144,5 @@ let solve program regs =
 let p1_regs = solve program { a = 7; b = 0; c = 0; d = 0 }
 let result_p1 = p1_regs.a
 let program = Array.of_list aoc_input
-let p2_regs = solve program { a = 5; b = 0; c = 0; d = 0 }
+let p2_regs = solve program { a = 12; b = 0; c = 0; d = 0 }
 let result_p2 = 0
