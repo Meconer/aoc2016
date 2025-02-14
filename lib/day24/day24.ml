@@ -1,6 +1,6 @@
 open Core
 
-let isExample = true
+let isExample = false
 
 let filename =
   if isExample then "lib/day24/example.txt" else "lib/day24/input.txt"
@@ -52,14 +52,6 @@ let build_grid lines =
   Array.of_list (String.to_list (List.reduce_exn lines ~f:(fun a b -> a ^ b)))
 
 let grid = build_grid aoc_input
-
-let find_nodes lines =
-  List.foldi lines ~init:[] ~f:(fun y acc line ->
-      let digits =
-        find_digits line
-        |> List.map ~f:(fun (dig, dig_idx) -> (dig, dig_idx + (y * width)))
-      in
-      acc @ digits)
 
 let find_nodes grid =
   Array.foldi grid ~init:[] ~f:(fun idx acc c ->
@@ -119,6 +111,8 @@ let build_edges node_list =
               if State.equal p1 p2 then acc
               else
                 let dist_opt = get_dist p1 p2 in
+                Printf.printf "Get dist for %d:%d - %d:%d\n" p1.x p1.y p2.x p2.y;
+                Out_channel.flush stdout;
                 match dist_opt with
                 | Some dist -> (fst b_node, dist) :: acc
                 | None -> failwith "Unreachable")
@@ -127,5 +121,6 @@ let build_edges node_list =
   in
   loop [] node_list
 
+let edges = build_edges (find_nodes grid)
 let result_p1 = 0
 let result_p2 = 0
