@@ -125,5 +125,24 @@ let edges =
   build_edges (find_nodes grid)
   |> List.sort ~compare:(fun a b -> Int.compare (fst a) (fst b))
 
+let find_dist e1 e2 =
+  let a = fst e1 in
+  let b = fst e2 in
+  let a_to_b = snd (List.find_exn (snd e1) ~f:(fun el -> fst el = b)) in
+  a_to_b
+
+let solve_p1 edges =
+  let rec loop acc edges =
+    match edges with
+    | [] -> acc
+    | hd :: tl ->
+        let dists =
+          List.fold tl ~init:[] ~f:(fun acc el ->
+              find_dist (fst hd) (fst (snd el)) :: acc)
+        in
+        loop (dists :: acc) tl
+  in
+  loop [] edges
+
 let result_p1 = 0
 let result_p2 = 0
