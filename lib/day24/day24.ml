@@ -126,7 +126,6 @@ let edges =
   |> List.sort ~compare:(fun a b -> Int.compare (fst a) (fst b))
 
 let find_dist e1 e2 =
-  let a = fst e1 in
   let b = fst e2 in
   let a_to_b = snd (List.find_exn (snd e1) ~f:(fun el -> fst el = b)) in
   a_to_b
