@@ -1,6 +1,6 @@
 open Core
 
-let isExample = true
+let isExample = false
 
 let filename =
   if isExample then "lib/day24/example.txt" else "lib/day24/input.txt"
@@ -126,22 +126,39 @@ let edges =
   |> List.sort ~compare:(fun a b -> Int.compare (fst a) (fst b))
 
 let find_dist e1 e2 =
-  let b = fst e2 in
-  let a_to_b = snd (List.find_exn (snd e1) ~f:(fun el -> fst el = b)) in
-  a_to_b
+  let dist_list = List.find_exn edges ~f:(fun edge -> fst edge = e1) in
+  let a_to_b = List.find_exn (snd dist_list) ~f:(fun el -> fst el = e2) in
+  snd a_to_b
 
-let solve_p1 edges =
-  let rec loop acc edges =
-    match edges with
-    | [] -> acc
-    | hd :: tl ->
-        let dists =
-          List.fold tl ~init:[] ~f:(fun acc el ->
-              find_dist (fst hd) (fst (snd el)) :: acc)
-        in
-        loop (dists :: acc) tl
+let rec insert_at_all_positions x lst =
+  match lst with
+  | [] -> [ [ x ] ]
+  | hd :: tl ->
+      (x :: lst)
+      :: List.map (insert_at_all_positions x tl) ~f:(fun sublist ->
+             hd :: sublist)
+
+let rec permutations lst =
+  match lst with
+  | [] -> [ [] ]
+  | hd :: tl ->
+      let perms = permutations tl in
+      List.concat_map ~f:(insert_at_all_positions hd) perms
+
+let make_dist_list lst =
+  let rec loop acc lst =
+    match lst with
+    | _ :: [] | [] -> acc
+    | a :: b :: rest -> loop (find_dist a b :: acc) (b :: rest)
   in
-  loop [] edges
+  loop [] lst
 
-let result_p1 = 0
+let solve_p1 (edges : (int * (int * int) list) list) =
+  let rest = List.drop edges 1 |> List.map ~f:fst in
+  let all_perms = permutations rest |> List.map ~f:(fun el -> 0 :: el) in
+  let dist_lists = List.map all_perms ~f:(fun perm -> make_dist_list perm) in
+  let totals = List.map dist_lists ~f:(fun l -> List.fold ~init:0 l ~f:( + )) in
+  List.hd_exn (List.sort totals ~compare:Int.compare)
+
+let result_p1 = solve_p1 edges
 let result_p2 = 0
