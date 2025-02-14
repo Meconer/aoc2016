@@ -111,8 +111,8 @@ let build_edges node_list =
               if State.equal p1 p2 then acc
               else
                 let dist_opt = get_dist p1 p2 in
-                Printf.printf "Get dist for %d:%d - %d:%d\n" p1.x p1.y p2.x p2.y;
-                Out_channel.flush stdout;
+                (* Printf.printf "Get dist for %d:%d - %d:%d\n" p1.x p1.y p2.x p2.y;
+                   Out_channel.flush stdout; *)
                 match dist_opt with
                 | Some dist -> (fst b_node, dist) :: acc
                 | None -> failwith "Unreachable")
@@ -160,5 +160,13 @@ let solve_p1 (edges : (int * (int * int) list) list) =
   let totals = List.map dist_lists ~f:(fun l -> List.fold ~init:0 l ~f:( + )) in
   List.hd_exn (List.sort totals ~compare:Int.compare)
 
+let solve_p2 (edges : (int * (int * int) list) list) =
+  let rest = List.drop edges 1 |> List.map ~f:fst in
+  let all_perms = permutations rest |> List.map ~f:(fun el -> 0 :: el) in
+  let all_perms = List.map all_perms ~f:(fun perm -> perm @ [ 0 ]) in
+  let dist_lists = List.map all_perms ~f:(fun perm -> make_dist_list perm) in
+  let totals = List.map dist_lists ~f:(fun l -> List.fold ~init:0 l ~f:( + )) in
+  List.hd_exn (List.sort totals ~compare:Int.compare)
+
 let result_p1 = solve_p1 edges
-let result_p2 = 0
+let result_p2 = solve_p2 edges
