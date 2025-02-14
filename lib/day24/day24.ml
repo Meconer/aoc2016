@@ -1,6 +1,6 @@
 open Core
 
-let isExample = false
+let isExample = true
 
 let filename =
   if isExample then "lib/day24/example.txt" else "lib/day24/input.txt"
@@ -121,6 +121,9 @@ let build_edges node_list =
   in
   loop [] node_list
 
-let edges = build_edges (find_nodes grid)
+let edges =
+  build_edges (find_nodes grid)
+  |> List.sort ~compare:(fun a b -> Int.compare (fst a) (fst b))
+
 let result_p1 = 0
 let result_p2 = 0
