@@ -1,10 +1,6 @@
 open Core
 
-let isExample = false
-
-let filename =
-  if isExample then "lib/day23/example.txt" else "lib/day23/input.txt"
-
+let filename = "lib/day25/input.txt"
 let aoc_input = In_channel.read_lines filename
 let program = Array.of_list aoc_input
 
@@ -44,6 +40,28 @@ let do_inc line regs =
   match Scanf.sscanf_opt line "inc %s" (fun x -> x) with
   | None -> failwith "Wrong format for inc"
   | Some x -> set_reg_value x regs (get_reg_value x regs + 1)
+
+let last_o_val = ref (-1)
+let ok_count = ref 0
+
+let output_val n =
+  Printf.printf "Out %d\n" n;
+  Out_channel.flush stdout;
+  let fail = n < 0 || n > 1 || !last_o_val = n in
+  last_o_val := n;
+  if not fail then ok_count := !ok_count + 1;
+  fail
+
+let do_out line regs =
+  match Scanf.sscanf_opt line "out %s" (fun s -> s) with
+  | None -> failwith "Wrong format for out"
+  | Some s ->
+      let o_val =
+        match int_of_string_opt s with
+        | None -> get_reg_value s regs
+        | Some x -> x
+      in
+      output_val o_val
 
 let do_dec line regs =
   match Scanf.sscanf_opt line "dec %s" (fun x -> x) with
@@ -115,34 +133,52 @@ let exec_line line ip regs program =
   match line with
   | line when String.is_prefix line ~prefix:"cpy" ->
       let regs = do_cpy line regs in
-      (ip + 1, regs, program)
+      (ip + 1, regs, program, false)
   | line when String.is_prefix line ~prefix:"inc" ->
       let regs = do_inc line regs in
-      (ip + 1, regs, program)
+      (ip + 1, regs, program, false)
   | line when String.is_prefix line ~prefix:"dec" ->
       let regs = do_dec line regs in
-      (ip + 1, regs, program)
+      (ip + 1, regs, program, false)
   | line when String.is_prefix line ~prefix:"jnz" ->
       let ip, regs = do_jnz line regs ip in
-      (ip, regs, program)
+      (ip, regs, program, false)
   | line when String.is_prefix line ~prefix:"tgl" ->
       let ip, regs, program = do_tgl line regs ip program in
-      (ip + 1, regs, program)
+      (ip + 1, regs, program, false)
+  | line when String.is_prefix line ~prefix:"out" ->
+      let fail = do_out line regs in
+      (ip + 1, regs, program, fail)
   | _ -> failwith "Illegal instruction"
 
-let solve program regs =
+let runprog program regs =
   let rec loop ip regs program =
-    if ip < 0 || ip >= Array.length program then regs
+    if ip < 0 || ip >= Array.length program then (regs, false)
     else
       let curr_line = program.(ip) in
-      (* Printf.printf "ip: %d   %s\n" ip curr_line; *)
-      let ip, regs, program = exec_line curr_line ip regs program in
-      loop ip regs program
+      if ip > 18 then (
+        (* print_status curr_line ip regs program; *)
+        Printf.printf "ip: %d   %s\n" ip curr_line;
+        print_regs regs;
+        Out_channel.flush stdout;
+        let _ = In_channel.input_line In_channel.stdin in
+        ());
+      let ip, regs, program, failed = exec_line curr_line ip regs program in
+
+      if (not failed) && !ok_count < 25 then loop ip regs program
+      else (regs, failed)
   in
   loop 0 regs program
 
-let p1_regs = solve program { a = 7; b = 0; c = 0; d = 0 }
-let result_p1 = p1_regs.a
-let program = Array.of_list aoc_input
-let p2_regs = solve program { a = 12; b = 0; c = 0; d = 0 }
-let result_p2 = p2_regs.a
+let solve program =
+  let rec loop a =
+    Printf.printf "a: %d\n" a;
+    Out_channel.flush stdout;
+    last_o_val := -1;
+    ok_count := 0;
+    let _, failed = runprog program { a; b = 0; c = 0; d = 0 } in
+    if failed then loop (a + 1) else a
+  in
+  loop 0
+
+let result_p1 = solve program

@@ -1,31 +1,30 @@
-a = input
-b = 0 
-c = 0
-d = 0
-
-    b = a
-    b--
-    d = a 
-    a = 0
-
-B:  c = b 
-
-A:  a++
-    c--
-    if c <> 0 then A
-    d--
-    if d <> 0 then B
-    b--
-    c = b 
-    d = c
-
-C:  d--
-    c++
-    if d <> 0 then C
-
-    tgl c
-    c = -16
-    
-...
-
-Didnt finish this pseudo code but I found out that the code solves n! + c where c = 81*73 in my case
+cpy a d         d = a
+cpy 9 c         c = 9
+cpy 282 b    B: b = 282
+inc d        A: d++
+dec b           b--
+jnz b -2        if b != 0 then goto A
+dec c           c--    
+jnz c -5        if c != 0 then goto B
+cpy d a      K: a = d
+jnz 0 0      J: nop                     Koden innan beräknar d = 9*282+a = 2538 + a
+cpy a b         b = a                   
+cpy 0 a         a = 0
+cpy 2 c      F: c = 2                   
+jnz b 2      E: if b != 0 then C
+jnz 1 6         jmp D
+dec b        C: b--
+dec c           c--
+jnz c -4        if c != 0 then E
+inc a           a++
+jnz 1 -7        jmp 
+cpy 2 b      D: b = 2
+jnz c 2      I: if c != 0 then G
+jnz 1 4         jmp H
+dec b           b--
+dec c        G: c--
+jnz 1 -4        jmp I 
+jnz 0 0      H: nop
+out b           out b
+jnz a -19       if a != 0 then  J 
+jnz 1 -21       jmp F
