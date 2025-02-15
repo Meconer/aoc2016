@@ -45,8 +45,8 @@ let last_o_val = ref (-1)
 let ok_count = ref 0
 
 let output_val n =
-  Printf.printf "Out %d\n" n;
-  Out_channel.flush stdout;
+  (* Printf.printf "Out %d\n" n;
+     Out_channel.flush stdout; *)
   let fail = n < 0 || n > 1 || !last_o_val = n in
   last_o_val := n;
   if not fail then ok_count := !ok_count + 1;
@@ -172,8 +172,8 @@ let runprog program regs =
 
 let solve program =
   let rec loop a =
-    Printf.printf "a: %d\n" a;
-    Out_channel.flush stdout;
+    (* Printf.printf "a: %d\n" a;
+       Out_channel.flush stdout; *)
     last_o_val := -1;
     ok_count := 0;
     let _, failed = runprog program { a; b = 0; c = 0; d = 0 } in
