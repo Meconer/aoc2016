@@ -156,13 +156,13 @@ let runprog program regs =
     if ip < 0 || ip >= Array.length program then (regs, false)
     else
       let curr_line = program.(ip) in
-      if ip > 18 then (
-        (* print_status curr_line ip regs program; *)
-        Printf.printf "ip: %d   %s\n" ip curr_line;
-        print_regs regs;
-        Out_channel.flush stdout;
-        let _ = In_channel.input_line In_channel.stdin in
-        ());
+      (* if ip = 27 then (
+         (* print_status curr_line ip regs program; *)
+         Printf.printf "ip: %d   %s\n" ip curr_line;
+         print_regs regs;
+         Out_channel.flush stdout;
+         let _ = In_channel.input_line In_channel.stdin in
+         ()); *)
       let ip, regs, program, failed = exec_line curr_line ip regs program in
 
       if (not failed) && !ok_count < 25 then loop ip regs program

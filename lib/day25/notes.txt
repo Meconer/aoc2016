@@ -23,8 +23,8 @@ jnz c 2      I: if c != 0 then G
 jnz 1 4         jmp H
 dec b           b--
 dec c        G: c--
-jnz 1 -4        jmp I 
-jnz 0 0      H: nop
+jnz 1 -4        jmp I                    Blev inte färdig med kodanalysen. Brute force blev 
+jnz 0 0      H: nop                      färdig och gav resultatet 192. 2538+ 192 = 2730 = 0xAAA dvs 101010101010 bin
 out b           out b
 jnz a -19       if a != 0 then  J 
 jnz 1 -21       jmp F
